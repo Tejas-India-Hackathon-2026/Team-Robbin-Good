@@ -190,15 +190,6 @@ public class MarketplaceService {
         double co2 = co2EstimateService.calculateB2bCo2Saved(listing.getWasteType(), txn.getAgreedQuantity());
         txn.setCo2SavedKg(co2);
 
-        // Mark listing as completed if fully used
-        if (txn.getAgreedQuantity() >= listing.getQuantity()) {
-            listing.setStatus(ListingStatus.COMPLETED);
-            listingRepo.save(listing);
-        } else {
-            listing.setQuantity(listing.getQuantity() - txn.getAgreedQuantity());
-            listingRepo.save(listing);
-        }
-
         return transactionRepo.save(txn);
     }
 
