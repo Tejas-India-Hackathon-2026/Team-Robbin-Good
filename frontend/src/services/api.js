@@ -74,6 +74,7 @@ export const walletService = {
 
 export const householdService = {
   searchByPhone: (phone) => api.get('/household/search', { params: { phone } }),
+  getPickups: (userId) => api.get(`/household/${userId}/pickups`),
 }
 
 export const compostService = {
