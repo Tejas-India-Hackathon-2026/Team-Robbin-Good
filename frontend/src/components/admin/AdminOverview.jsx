@@ -65,8 +65,8 @@ export default function AdminOverview({ refreshKey }) {
         <h2 className="text-lg font-semibold text-gray-700 mb-3">Household Collection</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Pickup Requests" value={stats.totalPickupRequests} sub={`${stats.collectedPickups} collected`} />
-          <StatCard label="Waste Collected" value={`${stats.totalWasteCollectedKg} kg`} />
-          <StatCard label="Collection Agents" value={stats.totalAgents} color="text-amber-600" />
+          <StatCard label="Pending Pickups" value={stats.pendingPickups || 0} color="text-yellow-600" />
+          <StatCard label="Total Payouts" value={`₹${stats.totalPayoutsPaid || 0}`} color="text-emerald-700" />
           <StatCard label="CO2 Saved (HH)" value={`${stats.totalCo2SavedHouseholdKg} kg`} color="text-emerald-600" />
         </div>
       </div>
@@ -74,8 +74,9 @@ export default function AdminOverview({ refreshKey }) {
       <div>
         <h2 className="text-lg font-semibold text-gray-700 mb-3">Aggregation & Impact</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Total Batches" value={stats.totalBatches} sub={`${stats.soldBatches} sold`} />
+          <StatCard label="Recycling Batches" value={stats.totalBatches} sub={`${stats.soldBatches} sold`} />
           <StatCard label="Batch Revenue" value={`₹${stats.totalBatchSaleAmount}`} color="text-green-700" />
+          <StatCard label="Compost Batches" value={stats.totalCompostBatches || 0} sub={`${stats.distributedCompostBatches || 0} distributed`} color="text-amber-600" />
           <StatCard label="Combined CO2 Saved" value={`${stats.combinedCo2SavedKg} kg`} color="text-emerald-600" sub="B2B + Household" />
         </div>
       </div>

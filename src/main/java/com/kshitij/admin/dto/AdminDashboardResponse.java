@@ -28,6 +28,10 @@ public class AdminDashboardResponse {
     private BigDecimal totalBatchSaleAmount;
     private double combinedCo2SavedKg;
     private Map<String, Long> usersByCity;
+    private BigDecimal totalPayoutsPaid;
+    private long totalCompostBatches;
+    private long distributedCompostBatches;
+    private long pendingPickups;
 
     public long getTotalUsers() { return totalUsers; }
     public void setTotalUsers(long totalUsers) { this.totalUsers = totalUsers; }
@@ -69,4 +73,12 @@ public class AdminDashboardResponse {
     public void setCombinedCo2SavedKg(double combinedCo2SavedKg) { this.combinedCo2SavedKg = combinedCo2SavedKg; }
     public Map<String, Long> getUsersByCity() { return usersByCity; }
     public void setUsersByCity(Map<String, Long> usersByCity) { this.usersByCity = usersByCity; }
+    public BigDecimal getTotalPayoutsPaid() { return totalPayoutsPaid; }
+    public void setTotalPayoutsPaid(BigDecimal totalPayoutsPaid) { this.totalPayoutsPaid = totalPayoutsPaid; }
+    public long getTotalCompostBatches() { return totalCompostBatches; }
+    public void setTotalCompostBatches(long totalCompostBatches) { this.totalCompostBatches = totalCompostBatches; }
+    public long getDistributedCompostBatches() { return distributedCompostBatches; }
+    public void setDistributedCompostBatches(long distributedCompostBatches) { this.distributedCompostBatches = distributedCompostBatches; }
+    public long getPendingPickups() { return pendingPickups; }
+    public void setPendingPickups(long pendingPickups) { this.pendingPickups = pendingPickups; }
 }

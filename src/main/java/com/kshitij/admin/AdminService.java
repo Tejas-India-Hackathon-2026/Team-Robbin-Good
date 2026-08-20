@@ -5,6 +5,7 @@ import com.kshitij.admin.dto.UserSummary;
 import com.kshitij.collection.AggregationBatch;
 import com.kshitij.collection.AggregationBatchRepository;
 import com.kshitij.collection.CollectionAgent;
+import com.kshitij.collection.CompostBatchRepository;
 import com.kshitij.collection.PickupRequest;
 import com.kshitij.collection.PickupRequestRepository;
 import com.kshitij.collection.CollectionAgentRepository;
@@ -27,19 +28,22 @@ public class AdminService {
     private final PickupRequestRepository pickupRepo;
     private final CollectionAgentRepository agentRepo;
     private final AggregationBatchRepository batchRepo;
+    private final CompostBatchRepository compostBatchRepo;
 
     public AdminService(UserRepository userRepo,
                         WasteListingRepository listingRepo,
                         TransactionRepository transactionRepo,
                         PickupRequestRepository pickupRepo,
                         CollectionAgentRepository agentRepo,
-                        AggregationBatchRepository batchRepo) {
+                        AggregationBatchRepository batchRepo,
+                        CompostBatchRepository compostBatchRepo) {
         this.userRepo = userRepo;
         this.listingRepo = listingRepo;
         this.transactionRepo = transactionRepo;
         this.pickupRepo = pickupRepo;
         this.agentRepo = agentRepo;
         this.batchRepo = batchRepo;
+        this.compostBatchRepo = compostBatchRepo;
     }
 
     public AdminDashboardResponse getSystemStats() {
@@ -88,6 +92,11 @@ public class AdminService {
             usersByCity.put(city, count);
         }
         stats.setUsersByCity(usersByCity);
+
+        stats.setTotalPayoutsPaid(pickupRepo.sumTotalPayouts());
+        stats.setTotalCompostBatches(compostBatchRepo.countAll());
+        stats.setDistributedCompostBatches(compostBatchRepo.countDistributed());
+        stats.setPendingPickups(pickupRepo.countPending());
 
         return stats;
     }

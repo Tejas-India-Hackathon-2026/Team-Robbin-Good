@@ -54,12 +54,31 @@ export const dashboardService = {
 
 export const pickupService = {
   create: (data) => api.post('/pickup-requests', data),
-  assign: (id, userId) =>
-    api.put(`/pickup-requests/${id}/assign`, null, { params: { userId } }),
-  collect: (id) => api.put(`/pickup-requests/${id}/collect`),
+  assign: (id, agentId) =>
+    api.put(`/pickup-requests/${id}/assign`, { agentId }),
+  collect: (id, data) => api.put(`/pickup-requests/${id}/collect`, data),
+  cancel: (id) => api.put(`/pickup-requests/${id}/cancel`),
   getAll: (params) => api.get('/pickup-requests', { params }),
   getById: (id) => api.get(`/pickup-requests/${id}`),
-  getByUser: (userId) => api.get(`/pickup-requests/user/${userId}`),
+  getByUser: (userId) => api.get(`/pickup-requests/household/${userId}`),
+  getByAgent: (agentId) => api.get(`/pickup-requests/assigned/${agentId}`),
+  getAgentPickups: (agentId) => api.get(`/pickup-requests/assigned/${agentId}`),
+}
+
+export const walletService = {
+  getBalance: (userId) => api.get(`/wallet/${userId}`),
+  getTransactions: (userId) => api.get(`/wallet/${userId}/transactions`),
+}
+
+export const compostService = {
+  getAll: () => api.get('/compost-batches'),
+  getByCity: (city) => api.get(`/compost-batches/${city}`),
+  distribute: (batchId, data) => api.post(`/compost-batches/${batchId}/distribute`, data),
+  getDistributions: (batchId) => api.get(`/compost-batches/${batchId}/distributions`),
+}
+
+export const rateCardService = {
+  getAll: () => api.get('/rate-card'),
 }
 
 export const agentService = {
@@ -85,6 +104,9 @@ export const adminService = {
   getPickups: () => api.get('/admin/pickups'),
   getAgents: () => api.get('/admin/agents'),
   getBatches: () => api.get('/admin/batches'),
+  getCompostBatches: () => compostService.getAll(),
+  distributeCompost: (batchId, data) => compostService.distribute(batchId, data),
+  getCompostDistributions: (batchId) => compostService.getDistributions(batchId),
 }
 
 export default api

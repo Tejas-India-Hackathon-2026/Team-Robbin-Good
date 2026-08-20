@@ -1,14 +1,11 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { useState } from 'react'
 import PickupRequestForm from '../components/household/PickupRequestForm'
 import MyPickupRequests from '../components/household/MyPickupRequests'
-import RewardsWidget from '../components/household/RewardsWidget'
+import WalletWidget from '../components/household/WalletWidget'
 import ImpactDashboard from '../components/impact/ImpactDashboard'
 
 export default function HouseholdDashboard() {
-  const { user } = useAuth()
   const [refreshKey, setRefreshKey] = useState(0)
-  const [rewards, setRewards] = useState(null)
 
   const refresh = () => setRefreshKey((k) => k + 1)
 
@@ -24,7 +21,7 @@ export default function HouseholdDashboard() {
           <PickupRequestForm onCreated={refresh} />
         </div>
         <div>
-          <RewardsWidget refreshKey={refreshKey} onRewardsLoaded={setRewards} />
+          <WalletWidget refreshKey={refreshKey} />
         </div>
       </div>
 
@@ -34,13 +31,6 @@ export default function HouseholdDashboard() {
         </h2>
         <MyPickupRequests refreshKey={refreshKey} />
       </div>
-
-      <ImpactDashboard
-        wasteDiverted={rewards?.totalWasteDiverted || 0}
-        co2Saved={rewards?.co2Saved || 0}
-        moneySaved={rewards?.totalPoints || 0}
-        history={rewards?.history || []}
-      />
     </div>
   )
 }

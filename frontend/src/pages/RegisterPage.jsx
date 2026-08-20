@@ -154,6 +154,9 @@ export default function RegisterPage() {
               <option value={ROLES.HOUSEHOLD_USER}>
                 {ROLE_LABELS[ROLES.HOUSEHOLD_USER]}
               </option>
+              <option value={ROLES.COLLECTION_AGENT}>
+                {ROLE_LABELS[ROLES.COLLECTION_AGENT]}
+              </option>
             </select>
           </div>
 

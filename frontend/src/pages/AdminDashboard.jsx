@@ -6,7 +6,7 @@ import AdminTransactionList from '../components/admin/AdminTransactionList'
 import AdminPickupList from '../components/admin/AdminPickupList'
 import AdminAgentList from '../components/admin/AdminAgentList'
 import AdminBatchList from '../components/admin/AdminBatchList'
-import AdminPayment from './AdminPayment'
+import AdminCompostList from '../components/admin/AdminCompostList'
 
 const TABS = [
   { key: 'overview', label: 'Overview' },
@@ -16,19 +16,14 @@ const TABS = [
   { key: 'pickups', label: 'Pickups' },
   { key: 'agents', label: 'Agents' },
   { key: 'batches', label: 'Batches' },
-  { key: 'payments', label: 'Payments' },
+  { key: 'compost', label: 'Compost' },
 ]
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
   const [refreshKey, setRefreshKey] = useState(0)
-  const [payments, setPayments] = useState([])
 
   const refresh = () => setRefreshKey((k) => k + 1)
-
-  const recordPayment = (payment) => {
-    setPayments((currentPayments) => [payment, ...currentPayments])
-  }
 
   const renderTab = () => {
     switch (activeTab) {
@@ -46,37 +41,8 @@ export default function AdminDashboard() {
         return <AdminAgentList refreshKey={refreshKey} />
       case 'batches':
         return <AdminBatchList refreshKey={refreshKey} onRefresh={refresh} />
-      case 'payments':
-        return (
-          <div className="space-y-6">
-            <AdminPayment onPaymentRecorded={recordPayment} />
-            {payments.length > 0 && (
-              <div className="bg-white rounded-xl shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-700 mb-4">
-                  Recent Payments
-                </h2>
-                <div className="space-y-3">
-                  {payments.map((payment) => (
-                    <div
-                      key={`${payment.createdAt}-${payment.recipient}`}
-                      className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0 last:pb-0"
-                    >
-                      <div>
-                        <p className="font-medium text-gray-800">{payment.recipient}</p>
-                        <p className="text-xs text-gray-500">
-                          {payment.method} {payment.reference && `· ${payment.reference}`}
-                        </p>
-                      </div>
-                      <span className="font-semibold text-green-700">
-                        ₹{payment.amount.toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )
+      case 'compost':
+        return <AdminCompostList refreshKey={refreshKey} />
       default:
         return null
     }

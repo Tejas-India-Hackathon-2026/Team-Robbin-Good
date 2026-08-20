@@ -1,49 +1,50 @@
 package com.kshitij.collection;
 
-import com.kshitij.common.exception.BadRequestException;
-import com.kshitij.common.exception.ResourceNotFoundException;
 import com.kshitij.collection.dto.*;
 import com.kshitij.impact.Co2EstimateService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class CollectionService {
-    private static final int POINTS_PER_KG = 2;
-
     private final PickupRequestRepository pickupRepo;
     private final CollectionAgentRepository agentRepo;
-    private final AggregationBatchRepository batchRepo;
-    private final RewardTransactionRepository rewardTxnRepo;
-    private final RewardBalanceRepository rewardBalanceRepo;
-    private final Co2EstimateService co2EstimateService;
+    private final WalletBalanceRepository walletBalanceRepo;
+    private final WalletTransactionRepository walletTxnRepo;
+    private final AggregationBatchRepository aggregationBatchRepo;
+    private final CompostBatchRepository compostBatchRepo;
+    private final FarmerDistributionRepository farmerDistRepo;
+    private final PayoutCalculationService payoutService;
+    private final Co2EstimateService co2Service;
 
     public CollectionService(PickupRequestRepository pickupRepo,
                              CollectionAgentRepository agentRepo,
-                             AggregationBatchRepository batchRepo,
-                             RewardTransactionRepository rewardTxnRepo,
-                             RewardBalanceRepository rewardBalanceRepo,
-                             Co2EstimateService co2EstimateService) {
+                             WalletBalanceRepository walletBalanceRepo,
+                             WalletTransactionRepository walletTxnRepo,
+                             AggregationBatchRepository aggregationBatchRepo,
+                             CompostBatchRepository compostBatchRepo,
+                             FarmerDistributionRepository farmerDistRepo,
+                             PayoutCalculationService payoutService,
+                             Co2EstimateService co2Service) {
         this.pickupRepo = pickupRepo;
         this.agentRepo = agentRepo;
-        this.batchRepo = batchRepo;
-        this.rewardTxnRepo = rewardTxnRepo;
-        this.rewardBalanceRepo = rewardBalanceRepo;
-        this.co2EstimateService = co2EstimateService;
+        this.walletBalanceRepo = walletBalanceRepo;
+        this.walletTxnRepo = walletTxnRepo;
+        this.aggregationBatchRepo = aggregationBatchRepo;
+        this.compostBatchRepo = compostBatchRepo;
+        this.farmerDistRepo = farmerDistRepo;
+        this.payoutService = payoutService;
+        this.co2Service = co2Service;
     }
 
-    /*
-     * POST /api/pickup-requests
-     * Household user requests a pickup.
-     */
-    public PickupRequest createPickupRequest(Long householdUserId, CreatePickupRequest req) {
+    public PickupRequest createPickupRequest(CreatePickupRequest req) {
         PickupRequest pr = new PickupRequest();
-        pr.setHouseholdUserId(householdUserId);
+        pr.setHouseholdUserId(1L);
         pr.setWasteType(req.getWasteType());
         pr.setEstimatedQuantity(req.getEstimatedQuantity());
         pr.setUnit(req.getUnit());
@@ -53,234 +54,204 @@ public class CollectionService {
         return pickupRepo.save(pr);
     }
 
-    /*
-     * PUT /api/pickup-requests/{id}/assign
-     * Admin/system assigns an active agent in the same city.
-     */
-    public PickupRequest assignAgent(Long pickupId) {
-        PickupRequest pr = getPickupOrThrow(pickupId);
+    public PickupRequest getPickupRequest(Long id) {
+        return pickupRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Pickup not found: " + id));
+    }
+
+    public List<PickupRequest> getPickupsByHousehold(Long householdUserId) {
+        return pickupRepo.findByHouseholdUserIdOrderByRequestedAtDesc(householdUserId);
+    }
+
+    public List<PickupRequest> getPickupsAssignedToAgent(Long agentId) {
+        return pickupRepo.findByAssignedAgentIdOrderByRequestedAtDesc(agentId);
+    }
+
+    public List<PickupRequest> getRequestedPickups() {
+        return pickupRepo.findByStatusOrderByRequestedAtDesc(PickupStatus.REQUESTED);
+    }
+
+    public PickupRequest assignAgent(Long pickupId, Long agentId) {
+        PickupRequest pr = getPickupRequest(pickupId);
         if (pr.getStatus() != PickupStatus.REQUESTED) {
-            throw new BadRequestException("Pickup request is not in REQUESTED status");
+            throw new RuntimeException("Pickup is not in REQUESTED status");
         }
-
-        List<CollectionAgent> agents = agentRepo.findByAssignedCityAndIsActive(pr.getCity(), true);
-        if (agents.isEmpty()) {
-            throw new BadRequestException("No active agents available in city: " + pr.getCity());
-        }
-
-        CollectionAgent agent = agents.get(0);
-        pr.setAssignedAgentId(agent.getId());
+        CollectionAgent agent = agentRepo.findById(agentId)
+            .orElseThrow(() -> new RuntimeException("Agent not found: " + agentId));
+        pr.setAssignedAgentId(agentId);
         pr.setStatus(PickupStatus.ASSIGNED);
         return pickupRepo.save(pr);
     }
 
-    /*
-     * PUT /api/pickup-requests/{id}/collect
-     * Agent marks as collected. This triggers:
-     * (a) Adding quantity to the relevant open AggregationBatch for city+wasteType
-     * (b) Auto-creating a RewardTransaction and updating RewardBalance
-     * (c) Calculating CO2 saved
-     */
-    @Transactional
-    public PickupRequest collectPickup(Long pickupId) {
-        PickupRequest pr = getPickupOrThrow(pickupId);
-        if (pr.getStatus() != PickupStatus.ASSIGNED) {
-            throw new BadRequestException("Pickup request must be ASSIGNED before collection");
+    public PickupRequest collectPickup(Long pickupId, CollectPickupRequest req) {
+        PickupRequest pr = getPickupRequest(pickupId);
+
+        pr.setActualQuantity(req.getActualQuantity());
+        pr.setWasteCategory(req.getWasteCategory());
+        pr.setSubType(req.getSubType());
+
+        double co2Saved = co2Service.calculateHouseholdCo2Saved(pr.getWasteType(), req.getActualQuantity());
+        pr.setCo2SavedKg(co2Saved);
+
+        BigDecimal payout = payoutService.getPayout(req.getSubType(), req.getActualQuantity());
+        pr.setPayoutAmount(payout);
+        pr.setStatus(PickupStatus.PAID_OUT);
+        pr.setCollectedAt(LocalDateTime.now());
+        pickupRepo.save(pr);
+
+        WalletBalance wallet = walletBalanceRepo.findByHouseholdUserId(pr.getHouseholdUserId())
+            .orElseGet(() -> {
+                WalletBalance wb = new WalletBalance();
+                wb.setHouseholdUserId(pr.getHouseholdUserId());
+                return wb;
+            });
+        wallet.setTotalBalance(wallet.getTotalBalance().add(payout));
+        wallet.setTotalEarnedLifetime(wallet.getTotalEarnedLifetime().add(payout));
+        walletBalanceRepo.save(wallet);
+
+        WalletTransaction txn = new WalletTransaction();
+        txn.setHouseholdUserId(pr.getHouseholdUserId());
+        txn.setPickupRequestId(pr.getId());
+        txn.setAmount(payout);
+        txn.setDescription("Payout for " + req.getActualQuantity() + "kg " + req.getSubType() + " waste");
+        walletTxnRepo.save(txn);
+
+        if (req.getWasteCategory() == WasteCategory.BIODEGRADABLE) {
+            compostBatchRepo.findByCityAndStatus(pr.getCity(), CompostBatchStatus.COLLECTING)
+                .ifPresentOrElse(
+                    batch -> {
+                        batch.setTotalQuantity(batch.getTotalQuantity() + req.getActualQuantity());
+                        compostBatchRepo.save(batch);
+                    },
+                    () -> {
+                        CompostBatch newBatch = new CompostBatch();
+                        newBatch.setCity(pr.getCity());
+                        newBatch.setTotalQuantity(req.getActualQuantity());
+                        compostBatchRepo.save(newBatch);
+                    }
+                );
+        } else {
+            aggregationBatchRepo.findByCityAndWasteTypeAndStatus(pr.getCity(), pr.getWasteType(), BatchStatus.COLLECTING)
+                .ifPresentOrElse(
+                    batch -> {
+                        batch.setTotalQuantity(batch.getTotalQuantity() + req.getActualQuantity());
+                        aggregationBatchRepo.save(batch);
+                    },
+                    () -> {
+                        AggregationBatch newBatch = new AggregationBatch();
+                        newBatch.setCity(pr.getCity());
+                        newBatch.setWasteType(pr.getWasteType());
+                        newBatch.setTotalQuantity(req.getActualQuantity());
+                        aggregationBatchRepo.save(newBatch);
+                    }
+                );
         }
 
-        pr.setStatus(PickupStatus.COLLECTED);
-        pr.setCollectedAt(LocalDateTime.now());
+        return pr;
+    }
 
-        // Map PickupWasteType to the aggregation batch's waste type (same enum)
-        PickupWasteType wasteType = pr.getWasteType();
-
-        // (a) Add to aggregation batch
-        AggregationBatch batch = batchRepo.findByCityAndWasteTypeAndStatus(
-                pr.getCity(), wasteType, BatchStatus.COLLECTING)
-                .orElseGet(() -> {
-                    AggregationBatch newBatch = new AggregationBatch();
-                    newBatch.setCity(pr.getCity());
-                    newBatch.setWasteType(wasteType);
-                    newBatch.setTotalQuantity(0.0);
-                    newBatch.setStatus(BatchStatus.COLLECTING);
-                    return batchRepo.save(newBatch);
-                });
-
-        batch.setTotalQuantity(batch.getTotalQuantity() + pr.getEstimatedQuantity());
-        batchRepo.save(batch);
-
-        // (b) Create reward transaction and update balance
-        int points = (int) (pr.getEstimatedQuantity() * POINTS_PER_KG);
-        RewardTransaction rewardTxn = new RewardTransaction();
-        rewardTxn.setHouseholdUserId(pr.getHouseholdUserId());
-        rewardTxn.setPickupRequestId(pr.getId());
-        rewardTxn.setPointsEarned(points);
-        rewardTxnRepo.save(rewardTxn);
-
-        RewardBalance balance = rewardBalanceRepo.findByHouseholdUserId(pr.getHouseholdUserId())
-                .orElseGet(() -> {
-                    RewardBalance newBalance = new RewardBalance();
-                    newBalance.setHouseholdUserId(pr.getHouseholdUserId());
-                    newBalance.setTotalPoints(0);
-                    newBalance.setRedeemedPoints(0);
-                    return rewardBalanceRepo.save(newBalance);
-                });
-        balance.setTotalPoints(balance.getTotalPoints() + points);
-        rewardBalanceRepo.save(balance);
-
-        // (c) Calculate CO2 saved
-        double co2 = co2EstimateService.calculateHouseholdCo2Saved(wasteType, pr.getEstimatedQuantity());
-        pr.setCo2SavedKg(co2);
-
+    public PickupRequest cancelPickup(Long pickupId) {
+        PickupRequest pr = getPickupRequest(pickupId);
+        if (pr.getStatus() == PickupStatus.PAID_OUT) {
+            throw new RuntimeException("Cannot cancel a paid-out pickup");
+        }
+        pr.setStatus(PickupStatus.CANCELLED);
         return pickupRepo.save(pr);
     }
 
-    /*
-     * GET /api/pickup-requests
-     * Admin can see all pickup requests, optionally filtered by city/status.
-     */
-    public List<PickupRequest> listPickupRequests(String city, PickupStatus status) {
-        if (city != null && !city.isBlank() && status != null) {
-            return pickupRepo.findByCityAndStatus(city, status);
-        }
-        if (status != null) {
-            return pickupRepo.findByStatus(status);
-        }
-        return pickupRepo.findAll();
-    }
-
-    /*
-     * GET /api/pickup-requests/{id}
-     */
-    public PickupRequest getPickupRequest(Long id) {
-        return getPickupOrThrow(id);
-    }
-
-    /*
-     * GET /api/pickup-requests/user/{userId}
-     * Household user's own pickup history.
-     */
-    public List<PickupRequest> getUserPickups(Long userId) {
-        return pickupRepo.findByHouseholdUserId(userId);
-    }
-
-    /*
-     * POST /api/agents
-     * Register a collection agent.
-     */
-    public CollectionAgent registerAgent(Long userId, String city) {
-        if (agentRepo.findByUserId(userId).isPresent()) {
-            throw new BadRequestException("Agent already registered for this user");
-        }
-        CollectionAgent agent = new CollectionAgent();
-        agent.setUserId(userId);
-        agent.setAssignedCity(city);
-        agent.setIsActive(true);
-        return agentRepo.save(agent);
-    }
-
-    /*
-     * GET /api/agents?city=X
-     */
-    public List<CollectionAgent> listAgents(String city) {
-        if (city != null && !city.isBlank()) {
-            return agentRepo.findByAssignedCityAndIsActive(city, true);
-        }
-        return agentRepo.findAll();
-    }
-
-    /*
-     * GET /api/aggregation-batches?city=X&status=COLLECTING
-     * Admin view of batches nearing bulk-sale threshold.
-     */
-    public List<AggregationBatch> listBatches(String city, BatchStatus status) {
-        if (city != null && !city.isBlank() && status != null) {
-            return batchRepo.findByCityAndStatus(city, status);
-        }
-        if (status != null) {
-            return batchRepo.findByStatus(status);
-        }
-        return batchRepo.findAll();
-    }
-
-    /*
-     * PUT /api/aggregation-batches/{id}/sell
-     * Admin marks a batch as sold to a bulk buyer.
-     */
-    public AggregationBatch sellBatch(Long batchId, SellBatchRequest req) {
-        AggregationBatch batch = batchRepo.findById(batchId)
-                .orElseThrow(() -> new ResourceNotFoundException("Batch not found with id: " + batchId));
-        if (batch.getStatus() != BatchStatus.COLLECTING) {
-            throw new BadRequestException("Batch is not in COLLECTING status");
-        }
-        batch.setStatus(BatchStatus.SOLD);
-        batch.setSoldToBuyerId(req.getSoldToBuyerId());
-        batch.setSaleAmount(req.getSaleAmount());
-        return batchRepo.save(batch);
-    }
-
-    /*
-     * GET /api/rewards/{householdUserId}
-     * User's point balance and history.
-     */
-    public RewardResponse getRewards(Long householdUserId) {
-        RewardBalance balance = rewardBalanceRepo.findByHouseholdUserId(householdUserId)
-                .orElseGet(() -> {
-                    RewardBalance b = new RewardBalance();
-                    b.setHouseholdUserId(householdUserId);
-                    b.setTotalPoints(0);
-                    b.setRedeemedPoints(0);
-                    return rewardBalanceRepo.save(b);
-                });
-        List<RewardTransaction> history = rewardTxnRepo.findByHouseholdUserIdOrderByCreatedAtDesc(householdUserId);
-        return new RewardResponse(
-                householdUserId,
-                balance.getTotalPoints(),
-                balance.getRedeemedPoints(),
-                balance.getAvailablePoints(),
-                history
-        );
-    }
-
-    /*
-     * GET /api/dashboard/household/{userId}
-     * Household user's impact dashboard — waste diverted, CO2 saved, points earned.
-     */
     public HouseholdDashboardResponse getHouseholdDashboard(Long userId) {
-        List<PickupRequest> allPickups = pickupRepo.findByHouseholdUserId(userId);
-        List<PickupRequest> collected = allPickups.stream()
-                .filter(p -> p.getStatus() == PickupStatus.COLLECTED)
-                .collect(Collectors.toList());
+        List<PickupRequest> allPickups = pickupRepo.findByHouseholdUserIdOrderByRequestedAtDesc(userId);
+        long collectedCount = allPickups.stream()
+            .filter(p -> p.getStatus() == PickupStatus.COLLECTED || p.getStatus() == PickupStatus.PAID_OUT)
+            .count();
+        double totalWaste = allPickups.stream()
+            .filter(p -> p.getStatus() == PickupStatus.COLLECTED || p.getStatus() == PickupStatus.PAID_OUT)
+            .mapToDouble(p -> p.getActualQuantity() != null ? p.getActualQuantity() : p.getEstimatedQuantity())
+            .sum();
+        double totalCo2 = allPickups.stream()
+            .filter(p -> p.getStatus() == PickupStatus.COLLECTED || p.getStatus() == PickupStatus.PAID_OUT)
+            .mapToDouble(p -> p.getCo2SavedKg() != null ? p.getCo2SavedKg() : 0.0)
+            .sum();
+        BigDecimal totalEarned = pickupRepo.sumTotalPayoutsByUser(userId);
+        WalletBalance wallet = getWallet(userId);
 
-        Double totalWaste = pickupRepo.sumCollectedQuantityByUser(userId);
-        Double totalCo2 = pickupRepo.sumCo2SavedByUser(userId);
-        RewardBalance balance = rewardBalanceRepo.findByHouseholdUserId(userId).orElse(null);
-        int totalPoints = balance != null ? balance.getTotalPoints() : 0;
-        int availablePoints = balance != null ? balance.getAvailablePoints() : 0;
-
-        List<HouseholdDashboardResponse.RecentPickupSummary> recentSummaries = new ArrayList<>();
-        collected.stream().limit(10).forEach(p -> recentSummaries.add(
-                new HouseholdDashboardResponse.RecentPickupSummary(
-                        p.getId(),
-                        p.getWasteType().name(),
-                        p.getEstimatedQuantity(),
-                        p.getCo2SavedKg(),
-                        p.getCollectedAt()
-                )));
+        List<HouseholdDashboardResponse.RecentPickupSummary> recentPickups = allPickups.stream()
+            .limit(5)
+            .map(p -> new HouseholdDashboardResponse.RecentPickupSummary(
+                p.getId(),
+                p.getWasteType() != null ? p.getWasteType().name() : null,
+                p.getEstimatedQuantity(),
+                p.getActualQuantity(),
+                p.getCo2SavedKg(),
+                p.getPayoutAmount(),
+                p.getWasteCategory() != null ? p.getWasteCategory().name() : null,
+                p.getSubType() != null ? p.getSubType().name() : null,
+                p.getCollectedAt()
+            ))
+            .collect(Collectors.toList());
 
         return new HouseholdDashboardResponse(
-                userId,
-                collected.size(),
-                totalWaste,
-                totalCo2,
-                totalPoints,
-                availablePoints,
-                recentSummaries
+            userId,
+            (int) collectedCount,
+            totalWaste,
+            Math.round(totalCo2 * 100.0) / 100.0,
+            0,
+            0,
+            wallet.getTotalBalance(),
+            wallet.getTotalEarnedLifetime(),
+            recentPickups
         );
     }
 
-    private PickupRequest getPickupOrThrow(Long id) {
-        return pickupRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pickup request not found with id: " + id));
+    public WalletBalance getWallet(Long householdUserId) {
+        return walletBalanceRepo.findByHouseholdUserId(householdUserId)
+            .orElseGet(() -> {
+                WalletBalance wb = new WalletBalance();
+                wb.setHouseholdUserId(householdUserId);
+                return wb;
+            });
+    }
+
+    public List<WalletTransaction> getWalletTransactions(Long householdUserId) {
+        return walletTxnRepo.findByHouseholdUserIdOrderByCreatedAtDesc(householdUserId);
+    }
+
+    public List<CompostBatch> getAllCompostBatches() {
+        return compostBatchRepo.findAll();
+    }
+
+    public List<CompostBatch> getCompostBatchesByCity(String city) {
+        return compostBatchRepo.findByCity(city);
+    }
+
+    public FarmerDistribution distributeCompost(Long compostBatchId, FarmerDistributionRequest req) {
+        CompostBatch batch = compostBatchRepo.findById(compostBatchId)
+            .orElseThrow(() -> new RuntimeException("Compost batch not found: " + compostBatchId));
+        if (batch.getStatus() == CompostBatchStatus.DISTRIBUTED) {
+            throw new RuntimeException("Batch already fully distributed");
+        }
+        if (req.getQuantityGiven() > batch.getTotalQuantity()) {
+            throw new RuntimeException("Distribution quantity exceeds batch total");
+        }
+        FarmerDistribution dist = new FarmerDistribution();
+        dist.setCompostBatchId(compostBatchId);
+        dist.setFarmerName(req.getFarmerName());
+        dist.setFarmerContact(req.getFarmerContact());
+        dist.setQuantityGiven(req.getQuantityGiven());
+        farmerDistRepo.save(dist);
+
+        batch.setTotalQuantity(batch.getTotalQuantity() - req.getQuantityGiven());
+        if (batch.getTotalQuantity() <= 0.001) {
+            batch.setStatus(CompostBatchStatus.DISTRIBUTED);
+        } else {
+            batch.setStatus(CompostBatchStatus.READY_FOR_DISTRIBUTION);
+        }
+        compostBatchRepo.save(batch);
+
+        return dist;
+    }
+
+    public List<FarmerDistribution> getDistributions(Long compostBatchId) {
+        return farmerDistRepo.findByCompostBatchId(compostBatchId);
     }
 }
