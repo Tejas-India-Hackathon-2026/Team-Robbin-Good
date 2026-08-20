@@ -112,7 +112,10 @@ public class MarketplaceService {
     /*
      * PUT /api/transactions/{id}/accept
      * Seller accepts the transaction request.
+     * Auto-rejects other pending requests for the same listing.
+     * Reduces listing quantity; marks listing COMPLETED if fully used.
      */
+    @Transactional
     public Transaction acceptTransaction(Long txnId, Long sellerId) {
         Transaction txn = getTransactionOrThrow(txnId);
         if (!txn.getSellerId().equals(sellerId)) {
@@ -121,8 +124,31 @@ public class MarketplaceService {
         if (txn.getStatus() != TransactionStatus.REQUESTED) {
             throw new BadRequestException("Transaction is not in REQUESTED status");
         }
+
+        WasteListing listing = getListingById(txn.getListingId());
+        if (listing.getQuantity() < txn.getAgreedQuantity()) {
+            throw new BadRequestException("Insufficient listing quantity. Available: " + listing.getQuantity());
+        }
+
         txn.setStatus(TransactionStatus.ACCEPTED);
-        return transactionRepo.save(txn);
+        transactionRepo.save(txn);
+
+        listing.setQuantity(listing.getQuantity() - txn.getAgreedQuantity());
+        if (listing.getQuantity() <= 0) {
+            listing.setStatus(ListingStatus.COMPLETED);
+        }
+        listingRepo.save(listing);
+
+        List<Transaction> others = transactionRepo.findByListingIdAndStatusIn(
+            txn.getListingId(), List.of(TransactionStatus.REQUESTED));
+        for (Transaction other : others) {
+            if (!other.getId().equals(txnId)) {
+                other.setStatus(TransactionStatus.REJECTED);
+                transactionRepo.save(other);
+            }
+        }
+
+        return txn;
     }
 
     /*
