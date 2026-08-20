@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 public class MarketplaceService {
-    private static final BigDecimal COMMISSION_RATE = new BigDecimal("0.06");
+    private static final BigDecimal COMMISSION_RATE = new BigDecimal("0.05");
 
     private final WasteListingRepository listingRepo;
     private final BuyerRequirementRepository requirementRepo;
@@ -156,7 +156,7 @@ public class MarketplaceService {
         txn.setStatus(TransactionStatus.COMPLETED);
         txn.setCompletedAt(LocalDateTime.now());
 
-        // Recalculate commission at completion (6% of total transaction value)
+        // Recalculate commission at completion (5% of total transaction value)
         BigDecimal totalValue = txn.getAgreedPrice().multiply(BigDecimal.valueOf(txn.getAgreedQuantity()));
         txn.setCommissionAmount(totalValue.multiply(COMMISSION_RATE).setScale(2, RoundingMode.HALF_UP));
 
