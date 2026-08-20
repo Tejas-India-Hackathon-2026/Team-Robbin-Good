@@ -6,6 +6,7 @@
   --animate-float: float 6s ease-in-out infinite;
   --animate-float-delayed: float-delayed 8s ease-in-out infinite;
   --animate-pulse-slow: pulse-slow 4s ease-in-out infinite;
+  --animate-truck: truck 12s ease-in-out infinite;
 
   @keyframes spin-slow {
     from { transform: rotate(0deg); }
@@ -26,6 +27,10 @@
   @keyframes pulse-slow {
     0%, 100% { opacity: 0.05; transform: scale(1); }
     50% { opacity: 0.09; transform: scale(1.05); }
+  }
+  @keyframes truck {
+    0%, 100% { transform: translateX(-50%) translateY(-50%); }
+    50% { transform: translateX(-45%) translateY(-55%); }
   }
 }
 
