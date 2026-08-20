@@ -187,14 +187,14 @@ public class MarketplaceService {
      * GET /api/transactions/seller/{sellerId}
      */
     public List<Transaction> getTransactionsBySeller(Long sellerId) {
-        return transactionRepo.findBySellerId(sellerId);
+        return transactionRepo.findBySellerIdOrderByCreatedAtDesc(sellerId);
     }
 
     /*
      * GET /api/transactions/buyer/{buyerId}
      */
     public List<Transaction> getTransactionsByBuyer(Long buyerId) {
-        return transactionRepo.findByBuyerId(buyerId);
+        return transactionRepo.findByBuyerIdOrderByCreatedAtDesc(buyerId);
     }
 
     /*

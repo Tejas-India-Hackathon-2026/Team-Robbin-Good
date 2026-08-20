@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findBySellerId(Long sellerId);
-    List<Transaction> findByBuyerId(Long buyerId);
+    List<Transaction> findBySellerIdOrderByCreatedAtDesc(Long sellerId);
+    List<Transaction> findByBuyerIdOrderByCreatedAtDesc(Long buyerId);
     List<Transaction> findByStatus(TransactionStatus status);
 
     // Dashboard queries — sum of (quantity × price per unit) = actual total value
