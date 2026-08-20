@@ -2,6 +2,8 @@ package com.kshitij.collection;
 
 import com.kshitij.collection.dto.*;
 import com.kshitij.impact.Co2EstimateService;
+import com.kshitij.user.User;
+import com.kshitij.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,6 +23,7 @@ public class CollectionService {
     private final FarmerDistributionRepository farmerDistRepo;
     private final PayoutCalculationService payoutService;
     private final Co2EstimateService co2Service;
+    private final UserRepository userRepo;
 
     public CollectionService(PickupRequestRepository pickupRepo,
                              CollectionAgentRepository agentRepo,
@@ -30,7 +33,8 @@ public class CollectionService {
                              CompostBatchRepository compostBatchRepo,
                              FarmerDistributionRepository farmerDistRepo,
                              PayoutCalculationService payoutService,
-                             Co2EstimateService co2Service) {
+                             Co2EstimateService co2Service,
+                             UserRepository userRepo) {
         this.pickupRepo = pickupRepo;
         this.agentRepo = agentRepo;
         this.walletBalanceRepo = walletBalanceRepo;
@@ -40,6 +44,7 @@ public class CollectionService {
         this.farmerDistRepo = farmerDistRepo;
         this.payoutService = payoutService;
         this.co2Service = co2Service;
+        this.userRepo = userRepo;
     }
 
     public PickupRequest createPickupRequest(CreatePickupRequest req) {
@@ -275,5 +280,30 @@ public class CollectionService {
 
     public List<FarmerDistribution> getDistributions(Long compostBatchId) {
         return farmerDistRepo.findByCompostBatchId(compostBatchId);
+    }
+
+    public User searchHouseholdByPhone(String phone) {
+        return userRepo.findByPhone(phone)
+            .orElseThrow(() -> new RuntimeException("No household user found with phone: " + phone));
+    }
+
+    public WalletBalance creditWallet(Long householdUserId, Double amount, String description) {
+        WalletBalance wallet = walletBalanceRepo.findByHouseholdUserId(householdUserId)
+            .orElseGet(() -> {
+                WalletBalance wb = new WalletBalance();
+                wb.setHouseholdUserId(householdUserId);
+                return wb;
+            });
+        wallet.setTotalBalance(wallet.getTotalBalance().add(BigDecimal.valueOf(amount)));
+        wallet.setTotalEarnedLifetime(wallet.getTotalEarnedLifetime().add(BigDecimal.valueOf(amount)));
+        walletBalanceRepo.save(wallet);
+
+        WalletTransaction txn = new WalletTransaction();
+        txn.setHouseholdUserId(householdUserId);
+        txn.setAmount(BigDecimal.valueOf(amount));
+        txn.setDescription(description != null ? description : "Manual credit by agent");
+        walletTxnRepo.save(txn);
+
+        return wallet;
     }
 }
