@@ -194,7 +194,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
                         {form.amount > 0 && (
                             <div className="flex justify-between text-xs mt-1 px-1 text-gray-600">
                                 <span title="Deducted for platform maintenance">Platform Fee: <span className="text-red-500 font-medium">-₹{calculatePlatformFee(form.amount)}</span></span>
-                                <span>Eco-Bonus: <span className="text-green-600 font-medium">+₹{calculateCarbonBonus(form.amount)}</span></span>
+                                <span title="Added for proper waste segregation">Eco-Bonus: <span className="text-green-600 font-medium">+₹{calculateCarbonBonus(form.amount)}</span></span>
                             </div>
                         )}
                     </div>
