@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /*
@@ -54,6 +55,16 @@ public class PickupRequest {
     @Column(nullable = false)
     private Double co2SavedKg = 0.0;
 
+    @Enumerated(EnumType.STRING)
+    private WasteCategory wasteCategory;
+
+    @Enumerated(EnumType.STRING)
+    private SubType subType;
+
+    private Double actualQuantity;
+
+    private BigDecimal payoutAmount;
+
     @CreatedDate
     private LocalDateTime requestedAt;
 
@@ -83,4 +94,12 @@ public class PickupRequest {
     public void setRequestedAt(LocalDateTime requestedAt) { this.requestedAt = requestedAt; }
     public LocalDateTime getCollectedAt() { return collectedAt; }
     public void setCollectedAt(LocalDateTime collectedAt) { this.collectedAt = collectedAt; }
+    public WasteCategory getWasteCategory() { return wasteCategory; }
+    public void setWasteCategory(WasteCategory wasteCategory) { this.wasteCategory = wasteCategory; }
+    public SubType getSubType() { return subType; }
+    public void setSubType(SubType subType) { this.subType = subType; }
+    public Double getActualQuantity() { return actualQuantity; }
+    public void setActualQuantity(Double actualQuantity) { this.actualQuantity = actualQuantity; }
+    public BigDecimal getPayoutAmount() { return payoutAmount; }
+    public void setPayoutAmount(BigDecimal payoutAmount) { this.payoutAmount = payoutAmount; }
 }

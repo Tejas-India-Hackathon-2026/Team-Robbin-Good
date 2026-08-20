@@ -4,5 +4,6 @@ public enum PickupStatus {
     REQUESTED,
     ASSIGNED,
     COLLECTED,
+    PAID_OUT,
     CANCELLED
 }
