@@ -81,7 +81,6 @@ export default function AdminPayment({ onPaymentRecorded }) {
                         id="payment-recipient"
                         name="recipient"
                         type="text"
-                        autoComplete="name"
                         value={form.recipient}
                         onChange={handleChange}
                         className={inputClass}
