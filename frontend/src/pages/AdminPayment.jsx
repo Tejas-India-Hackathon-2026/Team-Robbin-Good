@@ -23,6 +23,8 @@ export default function AdminPayment({ onPaymentRecorded }) {
         setMessage(null)
     }
 
+    const validateUPI = (id) => /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(id)
+
     const checkPaymentLimit = (amount) => amount <= 50000
 
     const generateTransactionId = () => 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase()
@@ -44,6 +46,11 @@ export default function AdminPayment({ onPaymentRecorded }) {
                 type: 'error',
                 text: 'Amount exceeds maximum limit of ₹50,000.',
             })
+            return
+        }
+
+        if (form.method === 'UPI' && form.recipient.includes('@') && !validateUPI(form.recipient)) {
+            setMessage({ type: 'error', text: 'Invalid UPI ID format.' })
             return
         }
 
