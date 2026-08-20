@@ -39,6 +39,7 @@ export const listingService = {
 export const transactionService = {
   request: (data) => api.post('/transactions/request', data),
   accept: (id) => api.put(`/transactions/${id}/accept`),
+  reject: (id) => api.put(`/transactions/${id}/reject`),
   complete: (id) => api.put(`/transactions/${id}/complete`),
   getById: (id) => api.get(`/transactions/${id}`),
   getBySeller: (sellerId) => api.get(`/transactions/seller/${sellerId}`),

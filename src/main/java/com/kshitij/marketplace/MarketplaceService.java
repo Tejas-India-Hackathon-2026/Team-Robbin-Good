@@ -125,6 +125,22 @@ public class MarketplaceService {
     }
 
     /*
+     * PUT /api/transactions/{id}/reject
+     * Seller rejects the transaction request.
+     */
+    public Transaction rejectTransaction(Long txnId, Long sellerId) {
+        Transaction txn = getTransactionOrThrow(txnId);
+        if (!txn.getSellerId().equals(sellerId)) {
+            throw new BadRequestException("Only the seller can reject this transaction");
+        }
+        if (txn.getStatus() != TransactionStatus.REQUESTED) {
+            throw new BadRequestException("Transaction is not in REQUESTED status");
+        }
+        txn.setStatus(TransactionStatus.REJECTED);
+        return transactionRepo.save(txn);
+    }
+
+    /*
      * PUT /api/transactions/{id}/complete
      * Marks transaction as completed. Auto-calculates commission and CO2 saved.
      */

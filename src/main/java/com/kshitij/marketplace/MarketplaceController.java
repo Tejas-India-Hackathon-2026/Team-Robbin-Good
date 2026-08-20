@@ -101,6 +101,17 @@ public class MarketplaceController {
     }
 
     /*
+     * PUT /api/transactions/{id}/reject
+     * Response: { success: true, data: { ...transaction }, message: "Transaction rejected" }
+     */
+    @PutMapping("/transactions/{id}/reject")
+    public ResponseEntity<ApiResponse<Transaction>> rejectTransaction(@PathVariable Long id) {
+        Long sellerId = SecurityUtils.getCurrentUserId();
+        Transaction txn = marketplaceService.rejectTransaction(id, sellerId);
+        return ResponseEntity.ok(ApiResponse.ok(txn, "Transaction rejected"));
+    }
+
+    /*
      * PUT /api/transactions/{id}/complete
      * Response: { success: true, data: { ...transaction, co2SavedKg }, message: "Transaction completed" }
      */
