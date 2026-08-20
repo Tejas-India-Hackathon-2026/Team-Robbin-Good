@@ -1,16 +1,61 @@
-# React + Vite
+# ResourceLoop
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+ResourceLoop is a circular-economy platform that connects businesses, households, collection agents, and administrators to manage reusable materials, listings, pickup requests, rewards, and impact reporting.
 
-Currently, two official plugins are available:
+## Project Structure
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `src/main/java` - Spring Boot REST API
+- `src/main/resources` - backend configuration
+- `frontend` - React and Vite web application
 
-## React Compiler
+## Technology
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Java 17 and Spring Boot
+- Spring Security with JWT authentication
+- Spring Data JPA and MySQL
+- React 19, React Router, Tailwind CSS, and Vite
 
-## Expanding the Oxlint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- Java 17+
+- Maven
+- Node.js and npm
+- MySQL
+
+Create a MySQL database named `resourceloop`, then update the datasource username and password in `src/main/resources/application.properties` for your local environment.
+
+## Run the Backend
+
+From the project root:
+
+```bash
+mvn spring-boot:run
+```
+
+The API runs on `http://localhost:8081` by default.
+
+## Run the Frontend
+
+From the `frontend` directory:
+
+```bash
+npm install
+npm run dev
+```
+
+Vite will print the local frontend URL in the terminal. Other available commands are:
+
+```bash
+npm run build
+npm run lint
+npm run preview
+```
+
+## Main Features
+
+- Role-based dashboards for sellers, buyers, households, collection agents, and administrators
+- Material listing and marketplace requests
+- Pickup request scheduling and collection tracking
+- Household rewards and balance tracking
+- Aggregation batch management
+- Environmental impact dashboards
