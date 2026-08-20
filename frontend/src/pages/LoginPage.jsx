@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import WasteBackground from '../components/WasteBackground'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -25,9 +26,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <WasteBackground>
+      <div className="w-full max-w-md bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8">
         <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+            <svg className="w-8 h-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L14 8H10L12 2Z" />
+              <path d="M12 22L10 16H14L12 22Z" />
+              <path d="M2 12L8 10V14L2 12Z" />
+              <path d="M22 12L16 14V10L22 12Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </div>
           <h1 className="text-3xl font-bold text-green-700">ResourceLoop</h1>
           <p className="text-gray-500 mt-2">Sign in to your account</p>
         </div>
@@ -83,6 +93,6 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
-    </div>
+    </WasteBackground>
   )
 }
