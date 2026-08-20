@@ -243,7 +243,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
                         </label>
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
                             <input type="checkbox" checked={sendWhatsApp} onChange={(e) => setSendWhatsApp(e.target.checked)} className="rounded text-green-600" />
-                            <span>Send WhatsApp Alert</span>
+                            <span className="cursor-pointer">Send WhatsApp Alert</span>
                         </label>
                     </div>
                 </div>
