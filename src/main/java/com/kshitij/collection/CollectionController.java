@@ -137,6 +137,12 @@ public class CollectionController {
         return ResponseEntity.ok(ApiResponse.ok(user, "Household user found"));
     }
 
+    @GetMapping("/household/{userId}/pickups")
+    public ResponseEntity<ApiResponse<List<PickupRequest>>> getHouseholdPickups(@PathVariable Long userId) {
+        List<PickupRequest> pickups = collectionService.getPickupsByHousehold(userId);
+        return ResponseEntity.ok(ApiResponse.ok(pickups, "Found " + pickups.size() + " pickups"));
+    }
+
     @PostMapping("/wallet/credit")
     public ResponseEntity<ApiResponse<WalletBalance>> creditWallet(
             @RequestBody CreditWalletRequest req) {
