@@ -221,7 +221,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1 flex justify-between">
                             <span>Reference / Txn ID</span>
-                            <button type="button" onClick={() => copyTransactionId(form.reference || 'ECO-TXN-PENDING')} className="text-blue-600 hover:underline text-xs">Copy</button>
+                            <button type="button" onClick={() => copyTransactionId(form.reference || 'ECO-TXN-PENDING')} className="text-blue-600 hover:underline text-xs font-bold">Copy</button>
                         </label>
                         <input name="reference" type="text" value={form.reference} onChange={handleChange} className={inputClass} placeholder="Leave blank to auto-generate" />
                     </div>
