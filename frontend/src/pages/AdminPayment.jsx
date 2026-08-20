@@ -23,6 +23,8 @@ export default function AdminPayment({ onPaymentRecorded }) {
         setMessage(null)
     }
 
+    const generateTransactionId = () => 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase()
+
     const handleSubmit = (event) => {
         event.preventDefault()
         const amount = Number(form.amount)
@@ -39,6 +41,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
         setTimeout(() => {
             const payment = {
                 ...form,
+                reference: form.reference || generateTransactionId(),
                 recipient: form.recipient.trim(),
                 amount,
                 createdAt: new Date().toISOString(),
@@ -175,7 +178,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-5 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition text-sm disabled:opacity-50 flex items-center justify-center min-w-[140px]"
+                        className="px-5 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition text-sm disabled:opacity-50 flex items-center justify-center min-w-35"
                     >
                         {isSubmitting ? 'Recording...' : 'Record Payment'}
                     </button>
