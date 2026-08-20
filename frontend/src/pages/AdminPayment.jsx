@@ -17,6 +17,11 @@ export default function AdminPayment({ onPaymentRecorded }) {
         setMessage(null)
     }
 
+    const loadDemoPayment = () => {
+        setForm({ ...demoPayment, amount: String(demoPayment.amount) })
+        setMessage(null)
+    }
+
     const handleSubmit = (event) => {
         event.preventDefault()
         const amount = Number(form.amount)
