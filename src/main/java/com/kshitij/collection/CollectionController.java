@@ -3,6 +3,7 @@ package com.kshitij.collection;
 import com.kshitij.collection.dto.*;
 import com.kshitij.common.ApiResponse;
 import com.kshitij.impact.Co2EstimateService;
+import com.kshitij.user.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -128,5 +129,19 @@ public class CollectionController {
     @GetMapping("/rate-card")
     public ResponseEntity<ApiResponse<java.util.Map<SubType, BigDecimal>>> getRateCard() {
         return ResponseEntity.ok(ApiResponse.ok(payoutService.getAllRates(), "Rate card"));
+    }
+
+    @GetMapping("/household/search")
+    public ResponseEntity<ApiResponse<User>> searchHousehold(@RequestParam String phone) {
+        User user = collectionService.searchHouseholdByPhone(phone);
+        return ResponseEntity.ok(ApiResponse.ok(user, "Household user found"));
+    }
+
+    @PostMapping("/wallet/credit")
+    public ResponseEntity<ApiResponse<WalletBalance>> creditWallet(
+            @RequestBody CreditWalletRequest req) {
+        WalletBalance wallet = collectionService.creditWallet(
+            req.getHouseholdUserId(), req.getAmount(), req.getDescription());
+        return ResponseEntity.ok(ApiResponse.ok(wallet, "Wallet credited successfully"));
     }
 }
