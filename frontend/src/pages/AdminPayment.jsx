@@ -10,6 +10,7 @@ const initialForm = {
 export default function AdminPayment({ onPaymentRecorded }) {
     const [form, setForm] = useState(initialForm)
     const [message, setMessage] = useState(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleChange = (event) => {
         const { name, value } = event.target
@@ -34,16 +35,20 @@ export default function AdminPayment({ onPaymentRecorded }) {
             return
         }
 
-        const payment = {
-            ...form,
-            recipient: form.recipient.trim(),
-            amount,
-            createdAt: new Date().toISOString(),
-        }
+        setIsSubmitting(true)
+        setTimeout(() => {
+            const payment = {
+                ...form,
+                recipient: form.recipient.trim(),
+                amount,
+                createdAt: new Date().toISOString(),
+            }
 
-        onPaymentRecorded?.(payment)
-        setForm(initialForm)
-        setMessage({ type: 'success', text: 'Payment recorded successfully.' })
+            onPaymentRecorded?.(payment)
+            setForm(initialForm)
+            setMessage({ type: 'success', text: 'Payment recorded successfully.' })
+            setIsSubmitting(false)
+        }, 1000)
     }
 
     const inputClass =
@@ -64,7 +69,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
                 className="h-32 w-full rounded-lg object-cover"
             />
 
-            <div className="rounded-lg border border-green-100 bg-green-50 p-4">
+            <div className="rounded-lg border border-green-100 bg-green-50 p-4 relative">
                 <p className="text-xs font-semibold uppercase tracking-wide text-green-700">
                     Demo payment
                 </p>
@@ -77,6 +82,13 @@ export default function AdminPayment({ onPaymentRecorded }) {
                 <p className="mt-1 text-xs text-gray-600">
                     {demoPayment.method} · {demoPayment.reference}
                 </p>
+                <button
+                    type="button"
+                    onClick={loadDemoPayment}
+                    className="absolute top-4 right-4 px-3 py-1 bg-white border border-green-200 text-green-700 rounded text-xs font-medium hover:bg-green-100 transition"
+                >
+                    Load Demo
+                </button>
             </div>
 
             {message && (
@@ -159,12 +171,25 @@ export default function AdminPayment({ onPaymentRecorded }) {
                     />
                 </div>
 
-                <button
-                    type="submit"
-                    className="px-5 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition text-sm"
-                >
-                    Record Payment
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="px-5 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition text-sm disabled:opacity-50 flex items-center justify-center min-w-[140px]"
+                    >
+                        {isSubmitting ? 'Recording...' : 'Record Payment'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setForm(initialForm)
+                            setMessage(null)
+                        }}
+                        className="px-5 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition text-sm"
+                    >
+                        Clear Form
+                    </button>
+                </div>
             </form>
         </section>
     )
