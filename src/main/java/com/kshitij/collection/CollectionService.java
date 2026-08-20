@@ -63,8 +63,10 @@ public class CollectionService {
         return pickupRepo.findByHouseholdUserIdOrderByRequestedAtDesc(householdUserId);
     }
 
-    public List<PickupRequest> getPickupsAssignedToAgent(Long agentId) {
-        return pickupRepo.findByAssignedAgentIdOrderByRequestedAtDesc(agentId);
+    public List<PickupRequest> getPickupsAssignedToAgent(Long userId) {
+        CollectionAgent agent = agentRepo.findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("No agent profile found for user: " + userId));
+        return pickupRepo.findByAssignedAgentIdOrderByRequestedAtDesc(agent.getId());
     }
 
     public List<PickupRequest> getRequestedPickups() {
