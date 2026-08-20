@@ -11,6 +11,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
     const [form, setForm] = useState(initialForm)
     const [message, setMessage] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [sendEmail, setSendEmail] = useState(true)
 
     const handleChange = (event) => {
         const { name, value } = event.target
@@ -66,7 +67,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
 
             onPaymentRecorded?.(payment)
             setForm(initialForm)
-            setMessage({ type: 'success', text: 'Payment recorded successfully.' })
+            setMessage({ type: 'success', text: `Payment recorded successfully.${sendEmail ? ' Email sent.' : ''}` })
             setIsSubmitting(false)
         }, 1000)
     }
@@ -191,6 +192,12 @@ export default function AdminPayment({ onPaymentRecorded }) {
                     />
                 </div>
 
+                <div>
+                    <label className="flex items-center space-x-2 text-sm text-gray-700">
+                        <input type="checkbox" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} className="rounded text-green-600 focus:ring-green-500" />
+                        <span>Send email notification to recipient</span>
+                    </label>
+                </div>
                 <div className="flex gap-3">
                     <button
                         type="submit"
