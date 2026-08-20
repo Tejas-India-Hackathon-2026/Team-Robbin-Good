@@ -17,6 +17,11 @@ export default function AdminPayment({ onPaymentRecorded }) {
         setMessage(null)
     }
 
+    const handleReset = () => {
+        setForm(initialForm)
+        setMessage(null)
+    }
+
     const handleSubmit = (event) => {
         event.preventDefault()
         const amount = Number(form.amount)
@@ -75,7 +80,6 @@ export default function AdminPayment({ onPaymentRecorded }) {
                         id="payment-recipient"
                         name="recipient"
                         type="text"
-                        required
                         value={form.recipient}
                         onChange={handleChange}
                         className={inputClass}
@@ -91,7 +95,6 @@ export default function AdminPayment({ onPaymentRecorded }) {
                         id="payment-amount"
                         name="amount"
                         type="number"
-                        required
                         min="0.01"
                         step="0.01"
                         value={form.amount}
@@ -133,12 +136,21 @@ export default function AdminPayment({ onPaymentRecorded }) {
                     />
                 </div>
 
-                <button
-                    type="submit"
-                    className="px-5 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition text-sm"
-                >
-                    Record Payment
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        type="submit"
+                        className="px-5 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition text-sm"
+                    >
+                        Record Payment
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleReset}
+                        className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+                    >
+                        Clear form
+                    </button>
+                </div>
             </form>
         </section>
     )
