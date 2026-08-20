@@ -1,32 +1,32 @@
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { transactionService } from '../../services/api'
 import { WASTE_TYPE_LABELS, STATUS_COLORS } from '../../utils/constants'
-import { useState } from 'react'
 
 export default function IncomingRequests({ refreshKey, onAction }) {
   const { user } = useAuth()
+  const [requests, setRequests] = useState([])
+  const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(null)
-  const [transactionId, setTransactionId] = useState('')
-  const [tx, setTx] = useState(null)
-  const [error, setError] = useState('')
 
-  const handleFetch = async () => {
-    if (!transactionId.trim()) return
-    setError('')
-    setTx(null)
-    try {
-      const res = await transactionService.getById(transactionId.trim())
-      setTx(res.data.data || res.data)
-    } catch {
-      setError('Transaction not found')
-    }
+  const fetchRequests = () => {
+    setLoading(true)
+    transactionService
+      .getBySeller(user.id)
+      .then((res) => setRequests(res.data.data || res.data || []))
+      .catch(() => setRequests([]))
+      .finally(() => setLoading(false))
   }
+
+  useEffect(() => {
+    fetchRequests()
+  }, [user.id, refreshKey])
 
   const handleAccept = async (id) => {
     setActionLoading(id)
     try {
       await transactionService.accept(id)
-      handleFetch()
+      fetchRequests()
       onAction && onAction()
     } catch {
     } finally {
@@ -38,7 +38,7 @@ export default function IncomingRequests({ refreshKey, onAction }) {
     setActionLoading(id)
     try {
       await transactionService.complete(id)
-      handleFetch()
+      fetchRequests()
       onAction && onAction()
     } catch {
     } finally {
@@ -46,76 +46,69 @@ export default function IncomingRequests({ refreshKey, onAction }) {
     }
   }
 
-  return (
-    <div className="bg-white rounded-xl shadow p-5 space-y-4">
-      <p className="text-sm text-gray-500">
-        Look up a transaction by ID to view and manage it.
-      </p>
-
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={transactionId}
-          onChange={(e) => setTransactionId(e.target.value)}
-          placeholder="Transaction ID"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-        />
-        <button
-          onClick={handleFetch}
-          className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700"
-        >
-          Lookup
-        </button>
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl shadow p-6 animate-pulse space-y-3">
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-2/3" />
       </div>
+    )
+  }
 
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
+  if (requests.length === 0) {
+    return (
+      <div className="bg-white rounded-xl shadow p-6 text-center text-gray-500">
+        No incoming requests yet.
+      </div>
+    )
+  }
 
-      {tx && (
-        <div className="border rounded-lg p-4 space-y-3">
+  return (
+    <div className="bg-white rounded-xl shadow divide-y">
+      {requests.map((r) => (
+        <div key={r.id} className="p-4 space-y-2">
           <div className="flex items-center justify-between">
             <span className="font-medium text-gray-800">
-              {WASTE_TYPE_LABELS[tx.wasteType] || tx.wasteType}
+              Transaction #{r.id}
             </span>
             <span
               className={'text-xs font-medium px-2 py-1 rounded-full ' +
-                (STATUS_COLORS[tx.status] || 'text-gray-600 bg-gray-50')}
+                (STATUS_COLORS[r.status] || 'text-gray-600 bg-gray-50')}
             >
-              {tx.status}
+              {r.status}
             </span>
           </div>
           <p className="text-sm text-gray-600">
-            Quantity: {tx.requestedQuantity || tx.quantity} {tx.unit}
+            Quantity: {r.agreedQuantity} — Price: ₹{r.agreedPrice}/unit
           </p>
-          {tx.buyerName && (
-            <p className="text-sm text-gray-500">Buyer: {tx.buyerName}</p>
-          )}
-          {tx.sellerName && (
-            <p className="text-sm text-gray-500">Seller: {tx.sellerName}</p>
-          )}
+          <p className="text-sm text-gray-500">
+            Total: ₹{(r.agreedQuantity * r.agreedPrice).toFixed(2)}
+            {r.commissionAmount != null && r.commissionAmount > 0 && (
+              <> — Commission: ₹{r.commissionAmount}</>
+            )}
+          </p>
           <div className="flex gap-2">
-            {tx.status === 'PENDING' && (
+            {r.status === 'REQUESTED' && (
               <button
-                onClick={() => handleAccept(tx.id)}
-                disabled={actionLoading === tx.id}
+                onClick={() => handleAccept(r.id)}
+                disabled={actionLoading === r.id}
                 className="px-4 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50"
               >
-                Accept
+                {actionLoading === r.id ? 'Processing...' : 'Accept'}
               </button>
             )}
-            {tx.status === 'ACCEPTED' && (
+            {r.status === 'ACCEPTED' && (
               <button
-                onClick={() => handleComplete(tx.id)}
-                disabled={actionLoading === tx.id}
+                onClick={() => handleComplete(r.id)}
+                disabled={actionLoading === r.id}
                 className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                Mark Complete
+                {actionLoading === r.id ? 'Processing...' : 'Mark Complete'}
               </button>
             )}
           </div>
         </div>
-      )}
+      ))}
     </div>
   )
 }

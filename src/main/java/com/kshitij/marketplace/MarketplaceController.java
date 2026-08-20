@@ -57,6 +57,26 @@ public class MarketplaceController {
     }
 
     /*
+     * GET /api/transactions/seller/{sellerId}
+     * Response: { success: true, data: [ ...transactions ], message: "Found N transactions" }
+     */
+    @GetMapping("/transactions/seller/{sellerId}")
+    public ResponseEntity<ApiResponse<List<Transaction>>> getTransactionsBySeller(@PathVariable Long sellerId) {
+        List<Transaction> txns = marketplaceService.getTransactionsBySeller(sellerId);
+        return ResponseEntity.ok(ApiResponse.ok(txns, "Found " + txns.size() + " transactions"));
+    }
+
+    /*
+     * GET /api/transactions/buyer/{buyerId}
+     * Response: { success: true, data: [ ...transactions ], message: "Found N transactions" }
+     */
+    @GetMapping("/transactions/buyer/{buyerId}")
+    public ResponseEntity<ApiResponse<List<Transaction>>> getTransactionsByBuyer(@PathVariable Long buyerId) {
+        List<Transaction> txns = marketplaceService.getTransactionsByBuyer(buyerId);
+        return ResponseEntity.ok(ApiResponse.ok(txns, "Found " + txns.size() + " transactions"));
+    }
+
+    /*
      * POST /api/transactions/request
      * Request:  { listingId, agreedQuantity, agreedPrice }
      * Response: { success: true, data: { ...transaction }, message: "Transaction request sent" }

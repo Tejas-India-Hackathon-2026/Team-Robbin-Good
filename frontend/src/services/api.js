@@ -41,6 +41,8 @@ export const transactionService = {
   accept: (id) => api.put(`/transactions/${id}/accept`),
   complete: (id) => api.put(`/transactions/${id}/complete`),
   getById: (id) => api.get(`/transactions/${id}`),
+  getBySeller: (sellerId) => api.get(`/transactions/seller/${sellerId}`),
+  getByBuyer: (buyerId) => api.get(`/transactions/buyer/${buyerId}`),
 }
 
 export const dashboardService = {

@@ -166,6 +166,20 @@ public class MarketplaceService {
     }
 
     /*
+     * GET /api/transactions/seller/{sellerId}
+     */
+    public List<Transaction> getTransactionsBySeller(Long sellerId) {
+        return transactionRepo.findBySellerId(sellerId);
+    }
+
+    /*
+     * GET /api/transactions/buyer/{buyerId}
+     */
+    public List<Transaction> getTransactionsByBuyer(Long buyerId) {
+        return transactionRepo.findByBuyerId(buyerId);
+    }
+
+    /*
      * GET /api/dashboard/seller/{id}
      * Returns aggregate stats for a seller.
      */
