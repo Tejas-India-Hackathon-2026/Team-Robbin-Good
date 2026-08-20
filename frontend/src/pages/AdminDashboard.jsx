@@ -1,9 +1,4 @@
 import { useState } from 'react'
-<<<<<<< HEAD
-import AggregationBatchList from '../components/admin/AggregationBatchList'
-import SellBatchForm from '../components/admin/SellBatchForm'
-import AdminPayment from './AdminPayment'
-=======
 import AdminOverview from '../components/admin/AdminOverview'
 import AdminUserList from '../components/admin/AdminUserList'
 import AdminListingList from '../components/admin/AdminListingList'
@@ -21,7 +16,6 @@ const TABS = [
   { key: 'agents', label: 'Agents' },
   { key: 'batches', label: 'Batches' },
 ]
->>>>>>> a0faf4d611083a29d3b66c83e0acabf95608eb5d
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -71,21 +65,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-<<<<<<< HEAD
-      {selectedBatch && (
-        <SellBatchForm
-          batch={selectedBatch}
-          onSold={() => {
-            setSelectedBatch(null)
-            setRefreshKey((k) => k + 1)
-          }}
-        />
-      )}
-
-      <AdminPayment />
-=======
       {renderTab()}
->>>>>>> a0faf4d611083a29d3b66c83e0acabf95608eb5d
     </div>
   )
 }
