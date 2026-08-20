@@ -66,6 +66,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
                             : 'bg-red-50 text-red-700'
                     }`}
                     role="status"
+                    aria-live="polite"
                 >
                     {message.text}
                 </div>
