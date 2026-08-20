@@ -1,61 +1,75 @@
 # ResourceLoop
 
-ResourceLoop is a circular-economy platform that connects businesses, households, collection agents, and administrators to manage reusable materials, listings, pickup requests, rewards, and impact reporting.
+ResourceLoop is a web platform for managing reusable materials and connecting the people and businesses involved in the collection cycle.
 
-## Project Structure
+The application supports material listings, marketplace requests, pickups, rewards, aggregation batches, and impact tracking through role-based dashboards.
 
-- `src/main/java` - Spring Boot REST API
-- `src/main/resources` - backend configuration
-- `frontend` - React and Vite web application
+## Stack
 
-## Technology
+**Frontend**
 
-- Java 17 and Spring Boot
+- React 19
+- React Router
+- Tailwind CSS
+- Vite
+
+**Backend**
+
+- Java 17
+- Spring Boot
 - Spring Security with JWT authentication
-- Spring Data JPA and MySQL
-- React 19, React Router, Tailwind CSS, and Vite
+- Spring Data JPA
+- MySQL
 
-## Prerequisites
+## Requirements
 
-- Java 17+
+Install the following before running the project:
+
+- Java 17 or later
 - Maven
 - Node.js and npm
 - MySQL
 
-Create a MySQL database named `resourceloop`, then update the datasource username and password in `src/main/resources/application.properties` for your local environment.
+Create a MySQL database called `resourceloop`. Set the database username and password in `src/main/resources/application.properties`.
 
-## Run the Backend
+## Getting Started
 
-From the project root:
+### 1. Start the backend
+
+Run this command from the repository root:
 
 ```bash
 mvn spring-boot:run
 ```
 
-The API runs on `http://localhost:8081` by default.
+The backend starts on `http://localhost:8081`.
 
-## Run the Frontend
+### 2. Start the frontend
 
-From the `frontend` directory:
+Open a second terminal in the `frontend` directory:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Vite will print the local frontend URL in the terminal. Other available commands are:
+Open the local URL shown by Vite in your browser.
+
+## Available Scripts
+
+Run these commands from `frontend`:
 
 ```bash
-npm run build
-npm run lint
-npm run preview
+npm run dev       # Start the development server
+npm run build     # Create a production build
+npm run lint      # Check the source code
+npm run preview   # Preview the production build
 ```
 
-## Main Features
+## User Roles
 
-- Role-based dashboards for sellers, buyers, households, collection agents, and administrators
-- Material listing and marketplace requests
-- Pickup request scheduling and collection tracking
-- Household rewards and balance tracking
-- Aggregation batch management
-- Environmental impact dashboards
+- Business sellers can list materials and manage incoming requests.
+- Business buyers can search listings and request materials.
+- Household users can request pickups and track rewards.
+- Collection agents can manage assigned pickups.
+- Administrators can manage aggregation batches and platform operations.
