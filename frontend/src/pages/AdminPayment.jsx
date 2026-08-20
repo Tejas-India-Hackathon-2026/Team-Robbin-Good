@@ -23,6 +23,8 @@ export default function AdminPayment({ onPaymentRecorded }) {
         setMessage(null)
     }
 
+    const checkPaymentLimit = (amount) => amount <= 50000
+
     const generateTransactionId = () => 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase()
 
     const handleSubmit = (event) => {
@@ -33,6 +35,14 @@ export default function AdminPayment({ onPaymentRecorded }) {
             setMessage({
                 type: 'error',
                 text: 'Enter a recipient and a payment amount greater than zero.',
+            })
+            return
+        }
+
+        if (!checkPaymentLimit(amount)) {
+            setMessage({
+                type: 'error',
+                text: 'Amount exceeds maximum limit of ₹50,000.',
             })
             return
         }
