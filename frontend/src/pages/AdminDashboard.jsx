@@ -6,6 +6,7 @@ import AdminTransactionList from '../components/admin/AdminTransactionList'
 import AdminPickupList from '../components/admin/AdminPickupList'
 import AdminAgentList from '../components/admin/AdminAgentList'
 import AdminBatchList from '../components/admin/AdminBatchList'
+import AdminCompostList from '../components/admin/AdminCompostList'
 
 const TABS = [
   { key: 'overview', label: 'Overview' },
@@ -15,6 +16,7 @@ const TABS = [
   { key: 'pickups', label: 'Pickups' },
   { key: 'agents', label: 'Agents' },
   { key: 'batches', label: 'Batches' },
+  { key: 'compost', label: 'Compost' },
 ]
 
 export default function AdminDashboard() {
@@ -39,6 +41,8 @@ export default function AdminDashboard() {
         return <AdminAgentList refreshKey={refreshKey} />
       case 'batches':
         return <AdminBatchList refreshKey={refreshKey} onRefresh={refresh} />
+      case 'compost':
+        return <AdminCompostList refreshKey={refreshKey} />
       default:
         return null
     }
