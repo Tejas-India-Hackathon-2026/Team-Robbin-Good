@@ -58,6 +58,12 @@ export default function AdminPayment({ onPaymentRecorded }) {
                 </p>
             </div>
 
+            <img
+                src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=960&q=80"
+                alt="Person completing a digital payment"
+                className="h-32 w-full rounded-lg object-cover"
+            />
+
             {message && (
                 <div
                     className={`p-3 rounded-lg text-sm ${
