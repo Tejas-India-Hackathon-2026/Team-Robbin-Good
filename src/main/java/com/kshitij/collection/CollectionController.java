@@ -40,11 +40,19 @@ public class CollectionController {
         return ResponseEntity.ok(ApiResponse.ok(pickups, "Found " + pickups.size() + " pickups"));
     }
 
-    @GetMapping("/pickup-requests/assigned/{agentId}")
+    @GetMapping("/pickup-requests/assigned/{userId}")
     public ResponseEntity<ApiResponse<List<PickupRequest>>> getAgentAssignedPickups(
-            @PathVariable Long agentId) {
-        List<PickupRequest> pickups = collectionService.getPickupsAssignedToAgent(agentId);
-        return ResponseEntity.ok(ApiResponse.ok(pickups, "Found " + pickups.size() + " assigned pickups"));
+            @PathVariable Long userId) {
+        List<PickupRequest> pickups = collectionService.getPickupsForAgent(userId);
+        return ResponseEntity.ok(ApiResponse.ok(pickups, "Found " + pickups.size() + " pickups"));
+    }
+
+    @PutMapping("/pickup-requests/{id}/claim")
+    public ResponseEntity<ApiResponse<PickupRequest>> claimPickup(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
+        PickupRequest pr = collectionService.claimPickup(id, userId);
+        return ResponseEntity.ok(ApiResponse.ok(pr, "Pickup claimed"));
     }
 
     @PutMapping("/pickup-requests/{id}/assign")
