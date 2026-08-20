@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import AggregationBatchList from '../components/admin/AggregationBatchList'
 import SellBatchForm from '../components/admin/SellBatchForm'
+import AdminPayment from './AdminPayment'
 
 export default function AdminDashboard() {
   const [refreshKey, setRefreshKey] = useState(0)
@@ -24,6 +25,8 @@ export default function AdminDashboard() {
           }}
         />
       )}
+
+      <AdminPayment />
     </div>
   )
 }
