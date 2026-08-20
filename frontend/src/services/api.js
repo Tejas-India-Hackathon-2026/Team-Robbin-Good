@@ -39,6 +39,7 @@ export const listingService = {
 export const transactionService = {
   request: (data) => api.post('/transactions/request', data),
   accept: (id) => api.put(`/transactions/${id}/accept`),
+  reject: (id) => api.put(`/transactions/${id}/reject`),
   complete: (id) => api.put(`/transactions/${id}/complete`),
   getById: (id) => api.get(`/transactions/${id}`),
   getBySeller: (sellerId) => api.get(`/transactions/seller/${sellerId}`),
@@ -74,6 +75,16 @@ export const rewardsService = {
 export const aggregationService = {
   getBatches: (params) => api.get('/aggregation-batches', { params }),
   sellBatch: (id, data) => api.put(`/aggregation-batches/${id}/sell`, data),
+}
+
+export const adminService = {
+  getStats: () => api.get('/admin/stats'),
+  getUsers: (params) => api.get('/admin/users', { params }),
+  getListings: () => api.get('/admin/listings'),
+  getTransactions: () => api.get('/admin/transactions'),
+  getPickups: () => api.get('/admin/pickups'),
+  getAgents: () => api.get('/admin/agents'),
+  getBatches: () => api.get('/admin/batches'),
 }
 
 export default api
