@@ -239,7 +239,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
                     <div className="pt-2 flex flex-col gap-2">
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
                             <input type="checkbox" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} className="rounded text-green-600 cursor-pointer" />
-                            <span>Send Email Receipt</span>
+                            <span className="cursor-pointer">Send Email Receipt</span>
                         </label>
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
                             <input type="checkbox" checked={sendWhatsApp} onChange={(e) => setSendWhatsApp(e.target.checked)} className="rounded text-green-600" />
