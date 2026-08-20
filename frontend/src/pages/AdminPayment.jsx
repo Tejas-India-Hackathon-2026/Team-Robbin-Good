@@ -232,7 +232,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Admin Notes (Reason)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Admin Notes (Optional)</label>
                         <textarea name="notes" rows="2" value={form.notes} onChange={handleChange} className={inputClass} placeholder="E.g. Paid for 20kg Cardboard"></textarea>
                     </div>
 
