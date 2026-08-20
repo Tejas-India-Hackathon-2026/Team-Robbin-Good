@@ -189,7 +189,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
-                        <input name="amount" type="number" required min="1" value={form.amount} onChange={handleChange} className={inputClass} placeholder="e.g. 1500" max="50000" max="50000" />
+                        <input name="amount" type="number" required min="1" value={form.amount} onChange={handleChange} className={inputClass} placeholder="e.g. 1500" max="50000" max="50000" max="50000" />
                         
                         {form.amount > 0 && (
                             <div className="flex justify-between text-xs mt-1 px-1 text-gray-600">
