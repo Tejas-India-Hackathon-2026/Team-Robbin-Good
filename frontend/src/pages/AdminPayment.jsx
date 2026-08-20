@@ -150,3 +150,10 @@ const demoPayment = {
     method: 'UPI',
     reference: 'DEMO-UPI-1024',
 }
+
+const formatRupees = (amount) =>
+    new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0,
+    }).format(amount)
