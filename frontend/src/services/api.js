@@ -63,6 +63,7 @@ export const pickupService = {
   getByUser: (userId) => api.get(`/pickup-requests/household/${userId}`),
   getByAgent: (agentId) => api.get(`/pickup-requests/assigned/${agentId}`),
   getAgentPickups: (agentId) => api.get(`/pickup-requests/assigned/${agentId}`),
+  claim: (id, userId) => api.put(`/pickup-requests/${id}/claim`, null, { params: { userId } }),
 }
 
 export const walletService = {
