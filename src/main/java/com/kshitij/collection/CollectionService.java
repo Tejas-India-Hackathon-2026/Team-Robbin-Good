@@ -143,6 +143,19 @@ public class CollectionService {
         txn.setDescription("Payout for " + req.getActualQuantity() + "kg " + req.getSubType() + " waste");
         walletTxnRepo.save(txn);
 
+        if (req.getBonusCredit() != null && req.getBonusCredit() > 0) {
+            wallet.setTotalBalance(wallet.getTotalBalance().add(BigDecimal.valueOf(req.getBonusCredit())));
+            wallet.setTotalEarnedLifetime(wallet.getTotalEarnedLifetime().add(BigDecimal.valueOf(req.getBonusCredit())));
+            walletBalanceRepo.save(wallet);
+
+            WalletTransaction bonusTxn = new WalletTransaction();
+            bonusTxn.setHouseholdUserId(pr.getHouseholdUserId());
+            bonusTxn.setPickupRequestId(pr.getId());
+            bonusTxn.setAmount(BigDecimal.valueOf(req.getBonusCredit()));
+            bonusTxn.setDescription(req.getBonusDescription() != null ? req.getBonusDescription() : "Agent bonus credit");
+            walletTxnRepo.save(bonusTxn);
+        }
+
         if (req.getWasteCategory() == WasteCategory.BIODEGRADABLE) {
             compostBatchRepo.findByCityAndStatus(pr.getCity(), CompostBatchStatus.COLLECTING)
                 .ifPresentOrElse(
