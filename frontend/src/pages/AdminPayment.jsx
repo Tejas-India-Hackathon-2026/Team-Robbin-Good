@@ -64,6 +64,15 @@ export default function AdminPayment({ onPaymentRecorded }) {
                 className="h-32 w-full rounded-lg object-cover"
             />
 
+            <div className="rounded-lg border border-green-100 bg-green-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-green-700">
+                    Demo payment
+                </p>
+                <p className="mt-1 text-sm font-semibold text-gray-800">
+                    {demoPayment.recipient}
+                </p>
+            </div>
+
             {message && (
                 <div
                     className={`p-3 rounded-lg text-sm ${
