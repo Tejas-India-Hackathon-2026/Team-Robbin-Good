@@ -37,7 +37,6 @@ export default function AdminPayment({ onPaymentRecorded }) {
         const payment = {
             ...form,
             recipient: form.recipient.trim(),
-            reference: form.reference.trim(),
             amount,
             createdAt: new Date().toISOString(),
         }
