@@ -7,6 +7,7 @@ import BusinessDashboard from './pages/BusinessDashboard'
 import HouseholdDashboard from './pages/HouseholdDashboard'
 import AgentDashboard from './pages/AgentDashboard'
 import AdminDashboard from './pages/AdminDashboard'
+import ProfilePage from './pages/ProfilePage'
 
 function DashboardRouter() {
   const { user } = useAuth()
@@ -38,6 +39,12 @@ function Navbar() {
           <span className="text-sm text-gray-600">
             {user.name || user.email}
           </span>
+          <a
+            href="/profile"
+            className="text-sm text-green-600 hover:text-green-800 font-medium"
+          >
+            Profile
+          </a>
           <span className="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-full font-medium">
             {user.role?.replace(/_/g, ' ')}
           </span>
@@ -66,6 +73,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <DashboardRouter />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />
