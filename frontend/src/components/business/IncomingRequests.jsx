@@ -28,7 +28,8 @@ export default function IncomingRequests({ refreshKey, onAction }) {
       await transactionService.accept(id)
       fetchRequests()
       onAction && onAction()
-    } catch {
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to accept request')
     } finally {
       setActionLoading(null)
     }
