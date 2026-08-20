@@ -15,7 +15,7 @@ export default function BuyerDashboardStats({ stats }) {
   const cards = [
     {
       label: 'Total Waste Bought',
-      value: `${stats.totalWasteBought || 0} kg`,
+      value: `${stats.totalWasteBoughtKg || 0} kg`,
       color: 'bg-blue-50 text-blue-700',
     },
     {

@@ -102,7 +102,8 @@ public class MarketplaceService {
         txn.setSellerId(listing.getSellerId());
         txn.setAgreedQuantity(req.getAgreedQuantity());
         txn.setAgreedPrice(req.getAgreedPrice());
-        txn.setCommissionAmount(req.getAgreedPrice().multiply(COMMISSION_RATE).setScale(2, RoundingMode.HALF_UP));
+        BigDecimal totalValue = req.getAgreedPrice().multiply(BigDecimal.valueOf(req.getAgreedQuantity()));
+        txn.setCommissionAmount(totalValue.multiply(COMMISSION_RATE).setScale(2, RoundingMode.HALF_UP));
         txn.setStatus(TransactionStatus.REQUESTED);
         txn.setCo2SavedKg(0.0);
         return transactionRepo.save(txn);
@@ -155,8 +156,9 @@ public class MarketplaceService {
         txn.setStatus(TransactionStatus.COMPLETED);
         txn.setCompletedAt(LocalDateTime.now());
 
-        // Recalculate commission at completion
-        txn.setCommissionAmount(txn.getAgreedPrice().multiply(COMMISSION_RATE).setScale(2, RoundingMode.HALF_UP));
+        // Recalculate commission at completion (6% of total transaction value)
+        BigDecimal totalValue = txn.getAgreedPrice().multiply(BigDecimal.valueOf(txn.getAgreedQuantity()));
+        txn.setCommissionAmount(totalValue.multiply(COMMISSION_RATE).setScale(2, RoundingMode.HALF_UP));
 
         // Calculate CO2 saved
         double co2 = co2EstimateService.calculateB2bCo2Saved(listing.getWasteType(), txn.getAgreedQuantity());
