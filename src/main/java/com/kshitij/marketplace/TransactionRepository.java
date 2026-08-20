@@ -11,6 +11,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findBySellerIdOrderByCreatedAtDesc(Long sellerId);
     List<Transaction> findByBuyerIdOrderByCreatedAtDesc(Long buyerId);
     List<Transaction> findByStatus(TransactionStatus status);
+    List<Transaction> findByListingIdAndStatusIn(Long listingId, java.util.List<TransactionStatus> statuses);
 
     // Dashboard queries — sum of (quantity × price per unit) = actual total value
     @Query("SELECT COALESCE(SUM(t.agreedQuantity), 0) FROM Transaction t WHERE t.sellerId = :sellerId AND t.status IN ('REQUESTED','ACCEPTED','PICKED_UP','COMPLETED')")
