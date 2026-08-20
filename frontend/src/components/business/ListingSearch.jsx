@@ -7,7 +7,11 @@ export default function ListingSearch({ onRequestSent }) {
   const [results, setResults] = useState([])
   const [searched, setSearched] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [requestingId, setRequestingId] = useState(null)
+  const [activeListing, setActiveListing] = useState(null)
+  const [qty, setQty] = useState('')
+  const [price, setPrice] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   const update = (field) => (e) =>
     setFilters((prev) => ({ ...prev, [field]: e.target.value }))
@@ -37,14 +41,39 @@ export default function ListingSearch({ onRequestSent }) {
     doSearch(params)
   }
 
-  const handleRequest = async (listingId) => {
-    setRequestingId(listingId)
+  const openRequestForm = (listing) => {
+    setActiveListing(listing)
+    setQty(String(listing.quantity || ''))
+    setPrice(String(listing.pricePerUnit || ''))
+    setError('')
+  }
+
+  const handleRequest = async (e) => {
+    e.preventDefault()
+    setError('')
+    const agreedQuantity = parseFloat(qty)
+    const agreedPrice = parseFloat(price)
+    if (!agreedQuantity || agreedQuantity <= 0) {
+      setError('Quantity must be greater than 0')
+      return
+    }
+    if (!agreedPrice || agreedPrice <= 0) {
+      setError('Price must be greater than 0')
+      return
+    }
+    setSubmitting(true)
     try {
-      await transactionService.request({ listingId, requestedQuantity: 1 })
+      await transactionService.request({
+        listingId: activeListing.id,
+        agreedQuantity,
+        agreedPrice,
+      })
+      setActiveListing(null)
       onRequestSent && onRequestSent()
-    } catch {
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send request')
     } finally {
-      setRequestingId(null)
+      setSubmitting(false)
     }
   }
 
@@ -97,6 +126,76 @@ export default function ListingSearch({ onRequestSent }) {
         </button>
       </form>
 
+      {activeListing && (
+        <form
+          onSubmit={handleRequest}
+          className="bg-white rounded-xl shadow p-5 space-y-3 border-2 border-blue-500"
+        >
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-gray-800">
+              Request: {WASTE_TYPE_LABELS[activeListing.wasteType] || activeListing.wasteType}
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveListing(null)}
+              className="text-gray-400 hover:text-gray-600 text-lg"
+            >
+              x
+            </button>
+          </div>
+          <p className="text-sm text-gray-500">
+            {activeListing.quantity} {activeListing.unit} available at{' '}
+            {activeListing.city}{activeListing.location ? ', ' + activeListing.location : ''}
+          </p>
+
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Quantity ({activeListing.unit})
+              </label>
+              <input
+                type="number"
+                required
+                min="0.01"
+                step="0.01"
+                value={qty}
+                onChange={(e) => setQty(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price per {activeListing.unit} (₹)
+              </label>
+              <input
+                type="number"
+                required
+                min="0.01"
+                step="0.01"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 font-medium">
+            Total: ₹{((parseFloat(qty) || 0) * (parseFloat(price) || 0)).toFixed(2)}
+          </p>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+          >
+            {submitting ? 'Sending...' : 'Send Request'}
+          </button>
+        </form>
+      )}
+
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
@@ -120,7 +219,7 @@ export default function ListingSearch({ onRequestSent }) {
                   {WASTE_TYPE_LABELS[l.wasteType] || l.wasteType}
                 </span>
                 <span className="text-green-700 font-bold">
-                  ₹{l.pricePerUnit != null ? l.pricePerUnit + '/' + l.unit : 'Negotiable'}
+                  {l.pricePerUnit != null ? '₹' + l.pricePerUnit + '/' + l.unit : 'Negotiable'}
                 </span>
               </div>
               <p className="text-sm text-gray-600">
@@ -130,11 +229,10 @@ export default function ListingSearch({ onRequestSent }) {
                 {l.city}{l.location ? ', ' + l.location : ''}
               </p>
               <button
-                onClick={() => handleRequest(l.id)}
-                disabled={requestingId === l.id}
-                className="w-full py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                onClick={() => openRequestForm(l)}
+                className="w-full py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition"
               >
-                {requestingId === l.id ? 'Requesting...' : 'Request'}
+                Request
               </button>
             </div>
           ))}
