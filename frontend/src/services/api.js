@@ -76,4 +76,14 @@ export const aggregationService = {
   sellBatch: (id, data) => api.put(`/aggregation-batches/${id}/sell`, data),
 }
 
+export const adminService = {
+  getStats: () => api.get('/admin/stats'),
+  getUsers: (params) => api.get('/admin/users', { params }),
+  getListings: () => api.get('/admin/listings'),
+  getTransactions: () => api.get('/admin/transactions'),
+  getPickups: () => api.get('/admin/pickups'),
+  getAgents: () => api.get('/admin/agents'),
+  getBatches: () => api.get('/admin/batches'),
+}
+
 export default api
