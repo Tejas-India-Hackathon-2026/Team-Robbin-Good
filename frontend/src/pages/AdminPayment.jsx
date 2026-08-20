@@ -184,7 +184,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
                 <div className="space-y-4 col-span-1">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Recipient (Name / UPI / ACC)</label>
-                        <input name="recipient" type="text" required value={form.recipient} onChange={handleChange} className={inputClass} placeholder="Enter recipient ID" />
+                        <input name="recipient" type="text" required value={form.recipient} onChange={handleChange} className={inputClass} placeholder="Enter recipient ID" autoFocus />
                     </div>
 
                     <div>
