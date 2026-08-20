@@ -97,7 +97,6 @@ export default function AdminPayment({ onPaymentRecorded }) {
                         id="payment-amount"
                         name="amount"
                         type="number"
-                        inputMode="decimal"
                         min="0.01"
                         step="0.01"
                         value={form.amount}
