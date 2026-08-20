@@ -147,7 +147,6 @@ export default function AdminPayment({ onPaymentRecorded }) {
                     <button
                         type="button"
                         onClick={handleReset}
-                        aria-label="Clear all payment form fields"
                         className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
                     >
                         Clear form
