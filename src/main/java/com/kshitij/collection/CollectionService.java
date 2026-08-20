@@ -63,10 +63,30 @@ public class CollectionService {
         return pickupRepo.findByHouseholdUserIdOrderByRequestedAtDesc(householdUserId);
     }
 
-    public List<PickupRequest> getPickupsAssignedToAgent(Long userId) {
+    public List<PickupRequest> getPickupsForAgent(Long userId) {
         CollectionAgent agent = agentRepo.findByUserId(userId)
             .orElseThrow(() -> new RuntimeException("No agent profile found for user: " + userId));
-        return pickupRepo.findByAssignedAgentIdOrderByRequestedAtDesc(agent.getId());
+
+        List<PickupRequest> assigned = pickupRepo.findByAssignedAgentIdOrderByRequestedAtDesc(agent.getId());
+        List<PickupRequest> cityAvailable = pickupRepo.findByCityAndStatusOrderByRequestedAtDesc(
+            agent.getAssignedCity(), PickupStatus.REQUESTED);
+
+        java.util.LinkedHashMap<Long, PickupRequest> merged = new java.util.LinkedHashMap<>();
+        cityAvailable.forEach(p -> merged.put(p.getId(), p));
+        assigned.forEach(p -> merged.put(p.getId(), p));
+        return new java.util.ArrayList<>(merged.values());
+    }
+
+    public PickupRequest claimPickup(Long pickupId, Long userId) {
+        CollectionAgent agent = agentRepo.findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("No agent profile found for user: " + userId));
+        PickupRequest pr = getPickupRequest(pickupId);
+        if (pr.getStatus() != PickupStatus.REQUESTED) {
+            throw new RuntimeException("Pickup is not available for claiming");
+        }
+        pr.setAssignedAgentId(agent.getId());
+        pr.setStatus(PickupStatus.ASSIGNED);
+        return pickupRepo.save(pr);
     }
 
     public List<PickupRequest> getRequestedPickups() {
