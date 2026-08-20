@@ -17,17 +17,17 @@ export default function SellerDashboardStats({ stats }) {
   const cards = [
     {
       label: 'Total Waste Sold',
-      value: `${stats.totalWasteSold || 0} kg`,
+      value: `${stats.totalWasteSoldKg || 0} kg`,
       color: 'bg-green-50 text-green-700',
     },
     {
       label: 'Total Earnings',
-      value: `₹${(stats.totalEarnings || 0).toLocaleString()}`,
+      value: `₹${(stats.totalEarned || 0).toLocaleString()}`,
       color: 'bg-blue-50 text-blue-700',
     },
     {
       label: 'Commission Paid',
-      value: `₹${(stats.commissionPaid || 0).toLocaleString()}`,
+      value: `₹${(stats.totalCommissionPaid || 0).toLocaleString()}`,
       color: 'bg-amber-50 text-amber-700',
     },
   ]

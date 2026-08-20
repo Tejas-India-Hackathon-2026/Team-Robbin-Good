@@ -34,6 +34,18 @@ export default function IncomingRequests({ refreshKey, onAction }) {
     }
   }
 
+  const handleReject = async (id) => {
+    setActionLoading(id)
+    try {
+      await transactionService.reject(id)
+      fetchRequests()
+      onAction && onAction()
+    } catch {
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   const handleComplete = async (id) => {
     setActionLoading(id)
     try {
@@ -89,13 +101,22 @@ export default function IncomingRequests({ refreshKey, onAction }) {
           </p>
           <div className="flex gap-2">
             {r.status === 'REQUESTED' && (
-              <button
-                onClick={() => handleAccept(r.id)}
-                disabled={actionLoading === r.id}
-                className="px-4 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50"
-              >
-                {actionLoading === r.id ? 'Processing...' : 'Accept'}
-              </button>
+              <>
+                <button
+                  onClick={() => handleAccept(r.id)}
+                  disabled={actionLoading === r.id}
+                  className="px-4 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {actionLoading === r.id ? 'Processing...' : 'Accept'}
+                </button>
+                <button
+                  onClick={() => handleReject(r.id)}
+                  disabled={actionLoading === r.id}
+                  className="px-4 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50"
+                >
+                  {actionLoading === r.id ? 'Processing...' : 'Reject'}
+                </button>
+              </>
             )}
             {r.status === 'ACCEPTED' && (
               <button
