@@ -66,10 +66,23 @@ npm run lint      # Check the source code
 npm run preview   # Preview the production build
 ```
 
+## Features
+
+- Secure registration, login, and JWT-based authentication
+- Role-based dashboards with tailored workflows for each type of user
+- Material listing creation and marketplace search
+- Buyer requests and seller request management
+- Household pickup requests with collection status tracking
+- Collection agent assignment and pickup completion workflows
+- Household reward balance and transaction tracking
+- Aggregation batch management and batch sales
+- Seller, buyer, and household dashboard statistics
+- Environmental impact reporting and progress tracking
+
 ## User Roles
 
-- Business sellers can list materials and manage incoming requests.
-- Business buyers can search listings and request materials.
-- Household users can request pickups and track rewards.
-- Collection agents can manage assigned pickups.
-- Administrators can manage aggregation batches and platform operations.
+- **Business sellers** can list materials and manage incoming requests.
+- **Business buyers** can search listings and request materials.
+- **Household users** can request pickups and track rewards.
+- **Collection agents** can manage assigned pickups.
+- **Administrators** can manage aggregation batches and platform operations.
