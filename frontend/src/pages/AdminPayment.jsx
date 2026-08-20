@@ -74,6 +74,9 @@ export default function AdminPayment({ onPaymentRecorded }) {
                 <p className="mt-2 text-2xl font-bold text-green-700">
                     {formatRupees(demoPayment.amount)}
                 </p>
+                <p className="mt-1 text-xs text-gray-600">
+                    {demoPayment.method} · {demoPayment.reference}
+                </p>
             </div>
 
             {message && (
