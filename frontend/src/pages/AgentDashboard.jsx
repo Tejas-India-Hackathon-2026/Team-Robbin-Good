@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import AgentPickupList from '../components/agent/AgentPickupList'
+import AgentCollectionWorkflow from '../components/agent/AgentCollectionWorkflow'
 import AgentWalletCredit from '../components/agent/AgentWalletCredit'
 
 export default function AgentDashboard() {
   const [refreshKey, setRefreshKey] = useState(0)
-  const [activeTab, setActiveTab] = useState('pickups')
+  const [activeTab, setActiveTab] = useState('collect')
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
@@ -12,15 +12,15 @@ export default function AgentDashboard() {
 
       <div className="flex gap-1 border-b border-gray-200">
         <button
-          onClick={() => setActiveTab('pickups')}
+          onClick={() => setActiveTab('collect')}
           className={
             'px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors -mb-px ' +
-            (activeTab === 'pickups'
+            (activeTab === 'collect'
               ? 'text-green-700 border-b-2 border-green-600'
               : 'text-gray-500 hover:text-gray-700')
           }
         >
-          Pickups
+          Collect Waste
         </button>
         <button
           onClick={() => setActiveTab('wallet')}
@@ -35,8 +35,8 @@ export default function AgentDashboard() {
         </button>
       </div>
 
-      {activeTab === 'pickups' && (
-        <AgentPickupList refreshKey={refreshKey} onCollected={() => setRefreshKey((k) => k + 1)} />
+      {activeTab === 'collect' && (
+        <AgentCollectionWorkflow key={refreshKey} onRefresh={() => setRefreshKey((k) => k + 1)} />
       )}
       {activeTab === 'wallet' && (
         <AgentWalletCredit onCredited={() => setRefreshKey((k) => k + 1)} />
