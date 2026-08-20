@@ -143,3 +143,10 @@ export default function AdminPayment({ onPaymentRecorded }) {
         </section>
     )
 }
+
+const demoPayment = {
+    recipient: 'Aarav Sharma',
+    amount: 1250,
+    method: 'UPI',
+    reference: 'DEMO-UPI-1024',
+}
