@@ -11,7 +11,7 @@ public interface PickupRequestRepository extends JpaRepository<PickupRequest, Lo
     List<PickupRequest> findByHouseholdUserIdOrderByRequestedAtDesc(Long householdUserId);
     List<PickupRequest> findByStatus(PickupStatus status);
     List<PickupRequest> findByStatusOrderByRequestedAtDesc(PickupStatus status);
-    List<PickupRequest> findByCityAndStatus(String city, PickupStatus status);
+    List<PickupRequest> findByCityAndStatusOrderByRequestedAtDesc(String city, PickupStatus status);
     List<PickupRequest> findByAssignedAgentIdOrderByRequestedAtDesc(Long agentId);
 
     @Query("SELECT COALESCE(SUM(p.estimatedQuantity), 0) FROM PickupRequest p WHERE p.householdUserId = :userId AND p.status = 'COLLECTED'")
