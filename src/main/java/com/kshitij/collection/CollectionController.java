@@ -69,6 +69,13 @@ public class CollectionController {
         return ResponseEntity.ok(ApiResponse.ok(pr, "Pickup cancelled"));
     }
 
+    @GetMapping("/dashboard/household/{userId}")
+    public ResponseEntity<ApiResponse<HouseholdDashboardResponse>> getHouseholdDashboard(
+            @PathVariable Long userId) {
+        HouseholdDashboardResponse dash = collectionService.getHouseholdDashboard(userId);
+        return ResponseEntity.ok(ApiResponse.ok(dash, "Household dashboard"));
+    }
+
     @GetMapping("/wallet/{userId}")
     public ResponseEntity<ApiResponse<WalletBalance>> getWallet(@PathVariable Long userId) {
         WalletBalance wallet = collectionService.getWallet(userId);

@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CollectionService {
@@ -155,6 +157,50 @@ public class CollectionService {
         }
         pr.setStatus(PickupStatus.CANCELLED);
         return pickupRepo.save(pr);
+    }
+
+    public HouseholdDashboardResponse getHouseholdDashboard(Long userId) {
+        List<PickupRequest> allPickups = pickupRepo.findByHouseholdUserIdOrderByRequestedAtDesc(userId);
+        long collectedCount = allPickups.stream()
+            .filter(p -> p.getStatus() == PickupStatus.COLLECTED || p.getStatus() == PickupStatus.PAID_OUT)
+            .count();
+        double totalWaste = allPickups.stream()
+            .filter(p -> p.getStatus() == PickupStatus.COLLECTED || p.getStatus() == PickupStatus.PAID_OUT)
+            .mapToDouble(p -> p.getActualQuantity() != null ? p.getActualQuantity() : p.getEstimatedQuantity())
+            .sum();
+        double totalCo2 = allPickups.stream()
+            .filter(p -> p.getStatus() == PickupStatus.COLLECTED || p.getStatus() == PickupStatus.PAID_OUT)
+            .mapToDouble(p -> p.getCo2SavedKg() != null ? p.getCo2SavedKg() : 0.0)
+            .sum();
+        BigDecimal totalEarned = pickupRepo.sumTotalPayoutsByUser(userId);
+        WalletBalance wallet = getWallet(userId);
+
+        List<HouseholdDashboardResponse.RecentPickupSummary> recentPickups = allPickups.stream()
+            .limit(5)
+            .map(p -> new HouseholdDashboardResponse.RecentPickupSummary(
+                p.getId(),
+                p.getWasteType() != null ? p.getWasteType().name() : null,
+                p.getEstimatedQuantity(),
+                p.getActualQuantity(),
+                p.getCo2SavedKg(),
+                p.getPayoutAmount(),
+                p.getWasteCategory() != null ? p.getWasteCategory().name() : null,
+                p.getSubType() != null ? p.getSubType().name() : null,
+                p.getCollectedAt()
+            ))
+            .collect(Collectors.toList());
+
+        return new HouseholdDashboardResponse(
+            userId,
+            (int) collectedCount,
+            totalWaste,
+            Math.round(totalCo2 * 100.0) / 100.0,
+            0,
+            0,
+            wallet.getTotalBalance(),
+            wallet.getTotalEarnedLifetime(),
+            recentPickups
+        );
     }
 
     public WalletBalance getWallet(Long householdUserId) {
