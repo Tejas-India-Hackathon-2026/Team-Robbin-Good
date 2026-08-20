@@ -145,7 +145,7 @@ export default function AdminPayment({ onPaymentRecorded }) {
         <section className="bg-white rounded-xl shadow p-6 space-y-4 max-w-2xl mx-auto">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-xl font-bold text-green-800">Record EcoWaste Payment</h2>
+                    <h2 className="text-xl font-bold text-green-800" title="EcoWaste Payments">Record EcoWaste Payment</h2>
                     <p className="text-sm text-gray-500 mt-1">
                         Process payouts for waste collection & marketplace sales.
                     </p>
